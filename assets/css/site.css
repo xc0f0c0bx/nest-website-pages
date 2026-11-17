@@ -463,19 +463,28 @@ html .recht-blatt h1,html .recht-blatt h2{font-size:clamp(28px,5vw,72px);hyphens
 .stand{font-size:13px;color:var(--text-leise)}
 @media (max-width:700px){.absatz{grid-template-columns:1fr}}
 
-/* Kreislauf-Einstieg unter der Methode */
-.kreislauf-teaser{margin-top:clamp(36px,4vw,64px);display:grid;grid-template-columns:minmax(120px,220px) minmax(0,1fr);gap:clamp(20px,4vw,64px);align-items:center;padding:clamp(20px,3vw,40px);background:var(--weiss);border:1px solid var(--schwarz)}
-.kreislauf-teaser h3{margin:6px 0 12px}
-.kreislauf-teaser p{margin-bottom:18px}
-.kreislauf-teaser__k{font-size:13px;text-transform:uppercase;letter-spacing:.08em}
-.kreislauf-mini{width:100%;height:auto}
-.kreislauf-mini__lauf{transform-origin:100px 100px;animation:kreislauf-lauf 14s linear infinite}
-@keyframes kreislauf-lauf{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.kreislauf-mini__lauf{animation:none}}
-@media (max-width:640px){.kreislauf-teaser{grid-template-columns:1fr}.kreislauf-mini{max-width:160px}}
-
-/* Projektbilder: je Projekt ein Schwarzweißbild 3:2, sonst Plangrafik */
-.karte .bild{aspect-ratio:3/2}
-.tafel-bild.leer,.karte .bild.leer,.galerie .buehne-bild.leer{background:var(--grund);display:grid;place-items:center}
-.plan-platz{width:min(70%,320px);height:auto}
-.karte .bild.leer .plan-platz{width:62%}
+/* Kreislauf als eigener Block */
+.kreislauf-block{background:var(--weiss);border-top:1px solid var(--schwarz)}
+.kreislauf-raster{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:clamp(28px,5vw,96px);align-items:center}
+.kreislauf-gross{margin:0}
+.kreislauf-gross svg{width:100%;height:auto;display:block}
+.kreislauf-block .lead{font-size:clamp(18px,1.5vw,22px);margin:20px 0 22px}
+.kreislauf-wege{list-style:none;padding:0;margin:0 0 28px;display:flex;flex-wrap:wrap;gap:8px;font-size:13px}
+.kreislauf-wege li{padding:6px 10px;background:var(--grund)}
+.kl-ring{fill:none;stroke:var(--schwarz);stroke-width:1.5}
+.kl-daten{fill:none;stroke:var(--schwarz);stroke-width:2;stroke-dasharray:1 7}
+.kl-wand{fill:none;stroke:var(--schwarz);stroke-width:8}
+.kl-innen{fill:none;stroke:var(--schwarz);stroke-width:4}
+.kl-gelb{fill:var(--gelb)}
+.kl-aus{fill:none;stroke:var(--schwarz);stroke-width:1.5}
+.kl-dauer{fill:var(--schwarz)}
+.kk{fill:var(--weiss);stroke:var(--schwarz);stroke-width:2;animation:kl-knoten 15s infinite}
+.kk-0{animation-delay:0s}.kk-1{animation-delay:1.67s}.kk-2{animation-delay:4.58s}.kk-3{animation-delay:8.33s}.kk-4{animation-delay:12.08s}
+@keyframes kl-knoten{0%,11%{fill:var(--gelb)}12%,100%{fill:var(--weiss)}}
+.kl-k{font:400 11px var(--f-mono);letter-spacing:.08em;fill:var(--text-leise)}
+.kl-t{font:700 15px var(--f-text);fill:var(--schwarz)}
+.kl-marke{fill:var(--gelb);stroke:var(--schwarz);stroke-width:1.5}
+.kl-lauf{transform-origin:260px 260px;transform:rotate(250deg);animation:kl-lauf 15s linear infinite}
+@keyframes kl-lauf{from{transform:rotate(250deg)}to{transform:rotate(610deg)}}
+@media (prefers-reduced-motion:reduce){.kk,.kl-lauf{animation:none}}
+@media (max-width:900px){.kreislauf-raster{grid-template-columns:1fr}.kreislauf-gross{max-width:460px}}
