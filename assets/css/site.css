@@ -491,3 +491,26 @@ html .recht-blatt h1,html .recht-blatt h2{font-size:clamp(28px,5vw,72px);hyphens
 }
 @media (max-width:900px){.kr-haft{grid-template-columns:1fr}.kr-grafik{max-width:420px}}
 @media (prefers-reduced-motion:reduce){.kr--animiert .kr-buehne::after{display:none}}
+
+/* Kreislauf im Detail (wie Website 2027): die Tafeln I–V hängen an ihren Stationen um die Grafik.
+   Winkel 0° = rechts, im Uhrzeigersinn: I 225°, II 180°, III 135°, IV 45°, V 345°.
+   Ohne Anchor Positioning, gerechnet über Container-Einheiten. */
+.kr-buehne{container-type:inline-size}
+@container (width >= 60rem){
+  .kr-haft{--kr-f:min(52vh,calc(100cqi - 2 * min(20rem,27cqi) - 2rem));--kr-p:150px;--kr-g:14px;
+    display:block;position:relative;height:calc(var(--kr-f) + 2 * var(--kr-p))}
+  .kr-figur{position:absolute;left:calc(50cqi - var(--kr-f) / 2);top:var(--kr-p);width:var(--kr-f);height:var(--kr-f)}
+  .kr-grafik{max-width:none;width:100%;height:100%}
+  .kr-text{position:static}
+  .kr-caps{display:block}
+  .kr-cap{position:absolute;width:min(22rem,calc((100cqi - var(--kr-f)) / 2 - 2rem));padding:12px 14px;background:var(--weiss);border:1px solid var(--schwarz);font-size:15px;line-height:1.45}
+  .kr-cap--aktiv{border-width:3px}
+  .kr-cap[data-nr="I"]{left:calc(50cqi + -0.3323 * var(--kr-f) + -1 * var(--kr-g));top:calc(var(--kr-p) + var(--kr-f) / 2 + -0.3323 * var(--kr-f) + -1 * var(--kr-g));transform:translate(-100%,-100%)}
+  .kr-cap[data-nr="II"]{left:calc(50cqi + -0.4700 * var(--kr-f) + -1 * var(--kr-g));top:calc(var(--kr-p) + var(--kr-f) / 2 + 0.0000 * var(--kr-f) + 0 * var(--kr-g));transform:translate(-100%,-50%)}
+  .kr-cap[data-nr="III"]{left:calc(50cqi + -0.3323 * var(--kr-f) + -1 * var(--kr-g));top:calc(var(--kr-p) + var(--kr-f) / 2 + 0.3323 * var(--kr-f) + 1 * var(--kr-g));transform:translate(-100%,0)}
+  .kr-cap[data-nr="IV"]{left:calc(50cqi + 0.3323 * var(--kr-f) + 1 * var(--kr-g));top:calc(var(--kr-p) + var(--kr-f) / 2 + 0.3323 * var(--kr-f) + 1 * var(--kr-g));transform:translate(0,0)}
+  .kr-cap[data-nr="V"]{left:calc(50cqi + 0.4540 * var(--kr-f) + 1 * var(--kr-g));top:calc(var(--kr-p) + var(--kr-f) / 2 + -0.1216 * var(--kr-f) + -1 * var(--kr-g));transform:translate(0,-50%)}
+  .kr-mehr{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);margin:0}
+  .kr--animiert .kr-cap{opacity:0;transition:opacity .35s var(--ease)}
+  .kr--animiert .kr-cap--aktiv{opacity:1}
+}
