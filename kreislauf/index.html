@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="de" data-lang="de" data-stufe="0" class="anonym ohne-befunde">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Zwischennutzungs-Kreislauf | NEST</title>
+<meta name="description" content="Der Zwischennutzungs-Kreislauf von NEST: Phase 0, vier Schritte, vier Werkzeuge, zyklisch und rekursiv bis in den Maßstab des Quartiers.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<style>
+/* NEST · Infografik Zwischennutzungs-Kreislauf. Entwurf.
+   Richtung: Plan auf Weiß. Wände massiv schwarz, Maße als 1px-Haarlinien, Gelb nur für „belegt / aktiv“. */
+@font-face{font-family:Apercu;font-weight:300;font-display:swap;src:url(../assets/fonts/apercu-light.woff2) format("woff2")}
+@font-face{font-family:Apercu;font-weight:700;font-display:swap;src:url(../assets/fonts/apercu-bold.woff2) format("woff2")}
+@font-face{font-family:"Apercu Mono";font-weight:400;font-display:swap;src:url(../assets/fonts/apercu-mono.woff2) format("woff2")}
+:root{
+  --gelb:#FFD630; --schwarz:#0F0F10; --anthrazit:#282A2C; --weiss:#fff; --grund:#F2F2EF; --leise:#4a4d50;
+  --rand:clamp(16px,4.4vw,64px);
+  --f-text:Apercu,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Apercu Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--weiss);color:var(--schwarz);font:300 clamp(17px,1.25vw,20px)/1.55 var(--f-text);-webkit-font-smoothing:antialiased;overflow-x:clip}
+::selection{background:var(--gelb)}
+.mono{font-family:var(--f-mono);font-weight:400;letter-spacing:.01em}
+h1,h2{font-weight:700;letter-spacing:-.025em;line-height:1.04;text-wrap:balance}
+p{max-width:58ch;text-wrap:pretty}
+.wrap{padding-inline:var(--rand);max-width:1680px;margin-inline:auto}
+
+/* Sprache */
+html[data-lang=de] .en,html[data-lang=en] .de{display:none!important}
+
+/* Kopf */
+.kopf{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;height:60px;background:var(--weiss);border-bottom:1px solid var(--schwarz)}
+.marke{font-weight:700;font-size:22px;letter-spacing:.04em}
+.entwurf{font-size:13px;padding:2px 8px;border:1px solid var(--schwarz)}
+.sprache{margin-left:auto;display:flex}
+.sprache button{min-width:44px;min-height:40px;background:none;border:1px solid var(--schwarz);font:400 14px var(--f-mono);cursor:pointer}
+.sprache button+button{border-left:0}
+.sprache button[aria-pressed=true]{background:var(--schwarz);color:var(--gelb)}
+:focus-visible{outline:3px solid var(--schwarz);outline-offset:3px}
+
+/* Einleitung */
+.einleitung{padding-block:clamp(56px,9vw,140px) clamp(32px,5vw,72px);display:grid;gap:24px}
+.kicker{font-size:14px;text-transform:uppercase;letter-spacing:.08em}
+.einleitung h1{font-size:clamp(38px,6vw,96px);max-width:14ch}
+.einleitung p{font-size:clamp(18px,1.5vw,22px)}
+.runter{display:inline-flex;gap:10px;align-items:center;font-size:14px}
+.runter::after{content:"";width:1px;height:28px;background:currentColor;animation:tropf 2.4s var(--ease) infinite}
+@keyframes tropf{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* Kreislauf: Bühne klebt, Schritte scrollen */
+.kreislauf{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);border-top:2px solid var(--schwarz)}
+.buehne{position:sticky;top:60px;height:calc(100vh - 60px);height:calc(100svh - 60px);display:grid;grid-template-rows:1fr auto;border-right:1px solid var(--schwarz);background:var(--weiss)}
+.buehne svg{width:100%;height:100%;min-height:0;display:block}
+.leiste{display:flex;gap:16px;justify-content:space-between;align-items:center;padding:10px var(--rand);border-top:1px solid var(--schwarz);font-size:13px;min-height:44px}
+.leiste #stand{text-align:center;flex:1}
+.leiste .masz{padding:1px 8px;border:1px solid var(--schwarz);white-space:nowrap}
+.schritte{list-style:none;padding:0}
+.schritt{min-height:92vh;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:12vh var(--rand);border-bottom:1px solid #d9d9d4;transition:opacity .5s var(--ease)}
+.schritt:not(.aktiv){opacity:.32}
+.schritt h2{font-size:clamp(30px,3.4vw,54px)}
+.schritt .kicker{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tag{display:inline-block;padding:1px 8px;border:1px solid var(--schwarz);font-size:13px;letter-spacing:.04em}
+.tag.gelb{background:var(--gelb);border-color:var(--gelb)}
+.zitat{font-size:14px;color:var(--leise);margin-top:-6px}
+.schritt[data-stufe="3"] h2{font-weight:300;font-size:clamp(26px,2.8vw,42px);letter-spacing:-.015em}
+/* Befunde aus der Praxis */
+html.ohne-befunde .befunde{display:none}
+.anon{display:none}
+html.anonym .projekt{display:none}
+html.anonym .anon{display:inline}
+.glyphe-zeile{display:flex;align-items:center;gap:10px}
+.glyphe{width:40px;height:40px;flex:none}
+.glyphe-text{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--leise)}
+
+.befunde{display:grid;gap:14px;margin-top:6px}
+.befund{border-top:1px solid var(--schwarz);padding-top:12px;display:grid;gap:6px;max-width:58ch}
+.befund .bkopf{display:flex;gap:10px;align-items:center;font:400 12px/1.2 var(--f-mono);letter-spacing:.07em;text-transform:uppercase}
+.befund .bkopf::before{content:"";flex:none;width:10px;height:10px;background:var(--gelb);outline:1px solid var(--schwarz)}
+.befund p{font-size:clamp(15px,1.05vw,17px);line-height:1.5}
+.befund .quelle{font:400 12px var(--f-mono);color:var(--leise)}
+.chips{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.chips li{font:400 13px/1.3 var(--f-mono);padding:6px 10px;background:var(--grund)}
+.chips li.raus{background:none;border:1px dashed var(--leise);color:var(--leise)}
+
+/* Schluss */
+.schluss{padding-block:clamp(56px,8vw,120px);display:grid;gap:28px;border-top:2px solid var(--schwarz)}
+.schluss h2{font-size:clamp(28px,3vw,44px)}
+.legende{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;list-style:none;padding:0}
+.legende li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;font-size:16px}
+.legende svg{width:44px;height:28px}
+
+/* ===== SVG ===== */
+svg text{font-family:var(--f-mono);fill:var(--schwarz)}
+.halo{paint-order:stroke;stroke:var(--weiss);stroke-width:7px;stroke-linejoin:round}
+.lbl{font-size:15px;letter-spacing:.02em}
+.lbl-k{font-size:11.5px;letter-spacing:.08em;fill:var(--leise)}
+.lbl-b{font-family:var(--f-text);font-weight:700;font-size:17px;letter-spacing:-.01em}
+.haar{fill:none;stroke:var(--schwarz);stroke-width:1}
+.strich{stroke-dasharray:3 5}
+.wand{fill:var(--schwarz)}
+.s{opacity:0;transition:opacity .7s var(--ease)}
+.s.an{opacity:1}
+.raum{fill:var(--gelb);opacity:0;transition:opacity .9s var(--ease)}
+.raum.an{opacity:1}
+.knoten rect{fill:var(--weiss);stroke:var(--schwarz);stroke-width:2;transition:fill .5s var(--ease)}
+.knoten.aktiv rect{fill:var(--gelb)}
+.knoten.erledigt rect{fill:var(--schwarz)}
+.knoten .lbl-b{transition:opacity .5s}
+.karte rect{fill:var(--weiss);stroke:var(--schwarz);stroke-width:1;transition:fill .5s var(--ease)}
+.karte.aktiv rect{fill:var(--gelb)}
+.karte .code{font-size:30px;letter-spacing:-.02em}
+#k-e6{transition:fill .5s var(--ease)}
+html:is([data-stufe="9"],[data-stufe="10"],[data-stufe="11"],[data-stufe="12"]) #k-e6{fill:var(--gelb)}
+#fortschritt{fill:none;stroke:var(--schwarz);stroke-width:4;transition:stroke-dashoffset 1.2s var(--ease)}
+.zeichnen{transition:stroke-dashoffset 1.4s var(--ease)}
+#plan{transition:opacity .7s var(--ease)}
+#kreis{transform-box:view-box;transform-origin:450px 400px;transition:transform 1.6s var(--ease)}
+html:is([data-stufe="3"],[data-stufe="5"],[data-stufe="12"]) #plan{opacity:.1}
+html:is([data-stufe="13"],[data-stufe="14"],[data-stufe="15"],[data-stufe="16"]) #kreis{transform:translate(-245px,20px) scale(.36)}
+html[data-stufe="17"] #kreis{transform:scale(.34)}
+.bt{fill:#fff;stroke:#0F0F10;stroke-width:8;transition:fill .8s var(--ease)}
+.bt.an{fill:#FFF1BA}
+.bt-e{stroke-width:2;stroke-dasharray:6 6}
+.fb{transform-box:fill-box;transform-origin:left center;transform:scaleX(0);transition:transform .9s var(--ease)}
+.an .fb{transform:scaleX(1)}
+.an .fb:nth-child(2){transition-delay:.3s}.an .fb:nth-child(3){transition-delay:.6s}
+.hof{fill:#fff;transition:fill .9s var(--ease)}
+.an .hof{fill:var(--gelb)}
+.hof-mini{opacity:0;transition:opacity .7s var(--ease)}
+.an .hof-mini{opacity:1}
+.pikto{opacity:0;transform:translateY(6px);transform-box:fill-box;transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.an .pikto{opacity:1;transform:none}
+.an .pikto:nth-child(1){transition-delay:0.00s}.an .pikto:nth-child(2){transition-delay:0.08s}.an .pikto:nth-child(3){transition-delay:0.16s}.an .pikto:nth-child(4){transition-delay:0.24s}.an .pikto:nth-child(5){transition-delay:0.32s}.an .pikto:nth-child(6){transition-delay:0.40s}.an .pikto:nth-child(7){transition-delay:0.48s}.an .pikto:nth-child(8){transition-delay:0.56s}.an .pikto:nth-child(9){transition-delay:0.64s}.an .pikto:nth-child(10){transition-delay:0.72s}
+/* Pegel in der Leiste: wie laut der Ort gerade nach außen wirkt */
+.pegel{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.06em}
+.pegel svg{width:62px;height:16px;display:block}
+.pegel rect{fill:#fff;stroke:var(--schwarz);stroke-width:1;transition:fill .4s var(--ease)}
+.pegel rect.an{fill:var(--gelb)}
+@media (max-width:520px){.pegel .wort{display:none}.pegel svg{width:44px}}
+.dz2{opacity:0;transition:opacity .8s var(--ease) .7s}
+.an .dz2{opacity:1}
+.tuer{transform-box:view-box;transition:transform 1.1s var(--ease)}
+.balken{transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);transition:transform 1s var(--ease)}
+.an .balken{transform:scaleY(1)}
+.an .balken:nth-child(2){transition-delay:.12s}.an .balken:nth-child(3){transition-delay:.24s}.an .balken:nth-child(4){transition-delay:.36s}.an .balken:nth-child(5){transition-delay:.48s}
+.partei{transition:transform 1.2s var(--ease)}
+
+@media (max-width:900px){
+  .kreislauf{grid-template-columns:1fr}
+  .buehne{top:60px;height:52vh;height:52svh;border-right:0;border-bottom:1px solid var(--schwarz);z-index:5}
+  .schritt{min-height:62vh;padding:5vh var(--rand) 8vh;background:var(--weiss);justify-content:flex-start}
+  .schritt:first-child{padding-top:6vh}
+  .lbl{font-size:21px}.lbl-k{font-size:15px}.lbl-b{font-size:22px}
+  .kategorien{display:none}
+  #schiene{display:none}
+  .leiste{font-size:12px;gap:8px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<header class="kopf wrap">
+  <a class="marke" href="../" data-heim style="text-decoration:none;color:inherit">NEST</a>
+  <a class="entwurf mono" href="../#methode" data-heim style="text-decoration:none;color:inherit"><span class="de">← Zur Startseite</span><span class="en">← Home</span></a>
+  <div class="sprache" role="group" aria-label="Sprache / Language">
+    <button type="button" data-setze="de" aria-pressed="true">DE</button>
+    <button type="button" data-setze="en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<section class="einleitung wrap">
+  <p class="kicker mono"><span class="de">Zwischennutzungs-Kreislauf</span><span class="en">The interim use cycle</span></p>
+  <h1><span class="de">Ein lernender Prozess</span><span class="en">A learning process</span></h1>
+  <p><span class="de">Phase 0, vier Schritte, vier Werkzeuge. Der Ort wird schrittweise geöffnet, Investitionen werden gezielt eingesetzt und Risiken begrenzt. Jede Erweiterung folgt aus realen Nutzungserfahrungen.</span><span class="en">Phase zero, four steps, four tools. The place is opened step by step, investment is targeted and risk is contained. Every extension follows from real experience of use.</span></p>
+  <p class="runter mono"><span class="de">Scrollen</span><span class="en">Scroll</span></p>
+</section>
+
+<section class="kreislauf" aria-label="Kreislauf / Cycle">
+  <div class="buehne">
+    <svg id="grafik" viewBox="0 0 1100 800" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs>
+        <marker id="pfeil" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#0F0F10" stroke-width="1.4"/></marker>
+        <linearGradient id="scanVerlauf" x1="0" x2="1"><stop offset="0" stop-color="#FFD630" stop-opacity="0"/><stop offset="1" stop-color="#FFD630" stop-opacity=".7"/></linearGradient>
+        <!-- Rekursion: jeder Knoten ist selbst ein kleiner Kreis -->
+        <symbol id="mini" viewBox="-24 -24 48 48" overflow="visible">
+          <circle r="20" class="haar"/>
+          <g><circle cx="0" cy="-20" r="3" fill="#0F0F10"/><circle cx="20" cy="0" r="2" fill="#0F0F10"/><circle cx="0" cy="20" r="2" fill="#0F0F10"/><circle cx="-20" cy="0" r="2" fill="#0F0F10"/>
+            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite"/></g>
+        </symbol>
+        <pattern id="schraffur" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="9" stroke="#0F0F10" stroke-width="1" opacity=".45"/></pattern>
+      </defs>
+
+      <!-- Quartier (nur Stufe 9): derselbe Kreis im größeren Maßstab -->
+      <!-- Quartier (Stufe 17): Schwarzplan, das Areal in der Mitte, derselbe Ring im großen Maßstab -->
+      <g id="quartier" class="s" data-sicht="17">
+        <clipPath id="quartierClip"><rect x="12" y="12" width="852" height="776"/></clipPath>
+        <g clip-path="url(#quartierClip)">
+          <line x1="90" y1="0" x2="90" y2="800" class="haar" stroke-dasharray="2 10" opacity=".5"/>
+          <line x1="330" y1="0" x2="330" y2="800" class="haar" stroke-dasharray="2 10" opacity=".5"/>
+          <line x1="570" y1="0" x2="570" y2="800" class="haar" stroke-dasharray="2 10" opacity=".5"/>
+          <line x1="810" y1="0" x2="810" y2="800" class="haar" stroke-dasharray="2 10" opacity=".5"/>
+          <line x1="0" y1="40" x2="868" y2="40" class="haar" stroke-dasharray="2 10" opacity=".5"/>
+          <line x1="0" y1="280" x2="868" y2="280" class="haar" stroke-dasharray="2 10" opacity=".5"/>
+          <line x1="0" y1="520" x2="868" y2="520" class="haar" stroke-dasharray="2 10" opacity=".5"/>
+          <line x1="0" y1="760" x2="868" y2="760" class="haar" stroke-dasharray="2 10" opacity=".5"/>
+          <rect x="-120" y="-170" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="-120" y="70" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="-120" y="310" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="-120" y="550" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="-120" y="790" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="120" y="-170" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="130" y="80" width="160" height="160" class="hof" style="transition-delay:0.5s"/>
+          <rect x="120" y="70" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <use href="#mini" x="150" y="100" width="120" height="120" class="hof-mini" style="transition-delay:0.8s"/>
+          <rect x="120" y="550" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="138" y="568" width="144" height="144" fill="none" stroke="#0F0F10" stroke-width="1.5" stroke-dasharray="5 5" class="hof-mini" style="transition-delay:2.2s"/>
+          <text x="210" y="592" text-anchor="middle" class="lbl-k hof-mini" style="transition-delay:2.2s"><tspan class="de">ALS NÄCHSTES</tspan><tspan class="en">NEXT</tspan></text>
+          <rect x="120" y="790" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="360" y="-170" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="360" y="550" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="360" y="790" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="600" y="-170" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="610" y="80" width="160" height="160" class="hof" style="transition-delay:1.7s"/>
+          <rect x="600" y="70" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <use href="#mini" x="630" y="100" width="120" height="120" class="hof-mini" style="transition-delay:2.0s"/>
+          <rect x="610" y="560" width="160" height="160" class="hof" style="transition-delay:1.1s"/>
+          <rect x="600" y="550" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <use href="#mini" x="630" y="580" width="120" height="120" class="hof-mini" style="transition-delay:1.4000000000000001s"/>
+          <rect x="600" y="790" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="840" y="-170" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="840" y="70" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="840" y="310" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="840" y="550" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="840" y="790" width="180" height="180" fill="none" stroke="#0F0F10" stroke-width="20"/>
+          <rect x="600" y="320" width="180" height="150" fill="#0F0F10"/>
+          <rect x="602" y="472" width="176" height="18" fill="none" stroke="#0F0F10" stroke-width="1" stroke-dasharray="3 4"/>
+          <rect x="120" y="318" width="180" height="44" fill="#0F0F10"/><rect x="120" y="398" width="180" height="44" fill="#0F0F10"/><rect x="120" y="478" width="120" height="14" fill="#0F0F10"/>
+          <path d="M360 250 V70 H540 V250" fill="none" stroke="#0F0F10" stroke-width="20"/>
+        </g>
+        <rect x="12" y="12" width="852" height="776" fill="none" stroke="#0F0F10" stroke-width="1"/>
+        <g transform="translate(810 36)"><path d="M0 -16 L7 4 L0 0 L-7 4 Z" fill="#0F0F10"/><text y="18" text-anchor="middle" class="lbl-k">N</text></g>
+        <rect x="352" y="302" width="196" height="196" fill="#fff" stroke="#0F0F10" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="352" y="293" class="lbl-k halo"><tspan class="de">AREAL</tspan><tspan class="en">SITE</tspan></text>
+        <circle cx="450" cy="400" r="372" fill="none" stroke="#fff" stroke-width="8"/>
+        <circle cx="450" cy="400" r="372" fill="none" stroke="#0F0F10" stroke-width="1.5"/>
+        <rect x="92.4" y="519.2" width="16" height="16" fill="#fff" stroke="#0F0F10" stroke-width="2"/>
+        <rect x="92.4" y="264.8" width="16" height="16" fill="#fff" stroke="#0F0F10" stroke-width="2"/>
+        <rect x="442.0" y="20.0" width="16" height="16" fill="#fff" stroke="#0F0F10" stroke-width="2"/>
+        <rect x="814.0" y="392.0" width="16" height="16" fill="#fff" stroke="#0F0F10" stroke-width="2"/>
+        <rect x="442.0" y="764.0" width="16" height="16" fill="#fff" stroke="#0F0F10" stroke-width="2"/>
+        <g><rect x="444" y="22" width="12" height="12" fill="#FFD630" stroke="#0F0F10" stroke-width="1.5"/>
+          <animateTransform attributeName="transform" type="rotate" from="160 450 400" to="520 450 400" dur="24s" repeatCount="indefinite"/></g>
+        <g transform="translate(14 742)">
+          <rect width="404" height="46" fill="#fff" stroke="#0F0F10"/>
+          <rect x="14" y="9" width="28" height="28" class="haar"/><rect x="18" y="13" width="20" height="20" class="haar"/><rect x="22" y="17" width="12" height="12" class="haar"/><rect x="25" y="20" width="6" height="6" fill="#FFD630" stroke="#0F0F10"/>
+          <text x="56" y="28" class="lbl-k"><tspan class="de">RAUM → BAUTEIL → AREAL → QUARTIER</tspan><tspan class="en">ROOM → PART → SITE → NEIGHBOURHOOD</tspan></text>
+        </g>
+      </g>
+
+      <!-- Areal (Stufen 13–16): der bisherige Kreis ist der von Bauteil A -->
+      <g id="areal" class="s" data-sicht="13-16">
+        <rect x="560" y="80" width="280" height="220" fill="#FFF1BA" class="s" data-sicht="15-16"/>
+        <rect x="560" y="80" width="280" height="220" fill="url(#schraffur)"/>
+        <rect data-bt="e" class="bt bt-e" x="80" y="560" width="480" height="130"/>
+        <rect data-bt="d" class="bt" x="610" y="350" width="220" height="340"/>
+        <rect data-bt="c" class="bt" x="610" y="140" width="110" height="100"/>
+        <rect data-bt="b" class="bt" x="330" y="300" width="230" height="240"/>
+        <rect data-bt="a" class="bt" x="80" y="300" width="250" height="240"/>
+        <g class="lbl halo">
+          <text x="80" y="286"><tspan font-weight="700">A</tspan> · <tspan class="de">START</tspan><tspan class="en">START</tspan></text>
+          <text x="334" y="286"><tspan font-weight="700">B</tspan> · <tspan class="de">ERWEITERUNG</tspan><tspan class="en">EXPANSION</tspan></text>
+          <text x="572" y="108"><tspan font-weight="700">C</tspan> · <tspan class="de">FREIRAUM</tspan><tspan class="en">OPEN SPACE</tspan></text>
+          <text x="610" y="336"><tspan font-weight="700">D</tspan> · <tspan class="de">RESERVE</tspan><tspan class="en">RESERVE</tspan></text>
+          <text x="96" y="590"><tspan font-weight="700">E</tspan> · <tspan class="de">PERSPEKTIVE</tspan><tspan class="en">PERSPECTIVE</tspan></text>
+        </g>
+        <g class="s" data-sicht="14-16">
+          <text x="80" y="266" class="lbl-k halo"><tspan class="de">SOFORT BETRIEBSFÄHIG · HOHE AUSSENWIRKUNG</tspan><tspan class="en">READY TO OPERATE · HIGH VISIBILITY</tspan></text>
+        </g>
+        <g class="s" data-sicht="15-16">
+          <use href="#mini" x="390" y="365" width="110" height="110"/>
+          <use href="#mini" x="620" y="145" width="90" height="90"/>
+          <path d="M312,420 H384" class="haar" marker-end="url(#pfeil)"/>
+          <path d="M205,310 C205,190 470,150 618,182" class="haar" marker-end="url(#pfeil)"/>
+          <text x="348" y="412" text-anchor="middle" class="lbl-k halo"><tspan class="de">ERFAHRUNG</tspan><tspan class="en">EXPERIENCE</tspan></text>
+        </g>
+        <g class="s" data-sicht="16">
+          <circle cx="720" cy="520" r="50" class="haar strich"/>
+          <circle cx="320" cy="625" r="40" class="haar strich"/>
+          <path d="M500,430 C570,430 610,480 666,505" class="haar strich" marker-end="url(#pfeil)"/>
+          <path d="M320,532 V580" class="haar strich" marker-end="url(#pfeil)"/>
+          <text x="720" y="524" text-anchor="middle" class="lbl-k halo"><tspan class="de">SPÄTER</tspan><tspan class="en">LATER</tspan></text>
+          <text x="320" y="629" text-anchor="middle" class="lbl-k halo"><tspan class="de">SPÄTER</tspan><tspan class="en">LATER</tspan></text>
+        </g>
+      </g>
+
+      <g id="kreis">
+        <!-- Datenring: läuft immer mit -->
+        <g id="daten" class="s" data-sicht="1-17">
+          <g>
+            <circle cx="450" cy="400" r="245" class="haar" stroke-dasharray="1 7" stroke-width="2"/>
+            <path id="datenpfad" d="M450,170 a230,230 0 1,1 0,460 a230,230 0 1,1 0,-460" fill="none"/>
+            <text class="lbl-k"><textPath href="#datenpfad" startOffset="0"><tspan class="de">DATEN · LAUFEND ERFASST · DATEN · LAUFEND ERFASST · </tspan><tspan class="en">DATA · RECORDED THROUGHOUT · DATA · RECORDED THROUGHOUT · </tspan></textPath></text>
+            <animateTransform attributeName="transform" type="rotate" from="0 450 400" to="360 450 400" dur="90s" repeatCount="indefinite"/>
+          </g>
+        </g>
+
+        <!-- Hauptring -->
+        <circle cx="450" cy="400" r="290" class="haar"/>
+        <circle id="fortschritt" cx="450" cy="400" r="290" transform="rotate(160 450 400)"/>
+
+        <!-- Rücksprünge nach der Entscheidung (Stufe 7) -->
+        <g id="rueck" class="s" data-sicht="8">
+          <path id="r-verl" class="haar zeichnen" marker-end="url(#pfeil)"/>
+          <path id="r-anp" class="haar zeichnen" marker-end="url(#pfeil)"/>
+          <path id="r-bee" class="haar zeichnen" marker-end="url(#pfeil)"/>
+          <g class="lbl-k halo" text-anchor="end">
+            <text x="394" y="98"><tspan class="de">↺ VERLÄNGERN</tspan><tspan class="en">↺ EXTEND</tspan></text>
+            <text x="122" y="352"><tspan class="de">↺ ANPASSEN</tspan><tspan class="en">↺ ADJUST</tspan></text>
+            <text x="134" y="584"><tspan class="de">↺ BEENDEN</tspan><tspan class="en">↺ END</tspan></text>
+          </g>
+          <g transform="translate(450 690) rotate(45)"><rect x="-17" y="-17" width="34" height="34" fill="#FFD630" stroke="#0F0F10" stroke-width="2"/></g>
+        </g>
+
+        <!-- Ausgang: Verstetigen -->
+        <g id="ausgang" class="s" data-sicht="8-12">
+          <path id="aus-pfad" d="M450,716 V746 Q450,762 466,762 H588" class="haar zeichnen" stroke-width="2" marker-end="url(#pfeil)"/>
+          <text x="470" y="788" class="lbl-k halo"><tspan class="de">VERSTETIGEN</tspan><tspan class="en">SUSTAIN</tspan></text>
+          <rect x="595" y="751" width="22" height="22" fill="#fff" stroke="#0F0F10" stroke-width="2" id="k-e6"/>
+          <text x="606" y="741" text-anchor="middle" class="lbl-k halo">04</text>
+        </g>
+        <g id="dauer" class="s" data-sicht="9-12">
+          <rect x="640" y="726" width="210" height="64" fill="#0F0F10"/>
+          <text x="656" y="752" class="lbl-k" style="fill:#FFD630"><tspan class="de">ERGEBNIS</tspan><tspan class="en">OUTCOME</tspan></text>
+          <text x="656" y="776" class="lbl-b" style="fill:#fff"><tspan class="de">Dauernutzung</tspan><tspan class="en">Permanent use</tspan></text>
+        </g>
+
+        <!-- Knoten (Positionen per Skript aus Winkeln) -->
+        <g id="knoten"></g>
+
+        <!-- Grundriss -->
+        <g id="plan">
+          <rect x="312" y="297" width="128" height="206" class="raum" data-raum="a"/>
+          <rect x="450" y="297" width="138" height="98" class="raum" data-raum="b"/>
+          <rect x="450" y="403" width="138" height="100" class="raum" data-raum="c"/>
+          <g class="wand">
+            <rect x="300" y="285" width="300" height="12"/><rect x="300" y="285" width="12" height="230"/><rect x="588" y="285" width="12" height="230"/>
+            <rect x="300" y="503" width="50" height="12"/><rect x="395" y="503" width="205" height="12"/>
+            <rect x="440" y="297" width="10" height="130"/><rect x="440" y="467" width="10" height="36"/>
+            <rect x="450" y="395" width="55" height="8"/><rect x="545" y="395" width="43" height="8"/>
+          </g>
+          <!-- Türen: gestrichelter Viertelkreis, Blatt dreht beim Öffnen -->
+          <path d="M395 509 A45 45 0 0 0 350 464" class="haar strich s" data-sicht="4-17"/>
+          <line x1="350" y1="509" x2="395" y2="509" stroke="#0F0F10" stroke-width="2" class="tuer" id="tuer-a" style="transform-origin:350px 509px"/>
+          <path d="M445 467 A40 40 0 0 1 485 427" class="haar strich s" data-sicht="6-17"/>
+          <line x1="445" y1="427" x2="445" y2="467" stroke="#0F0F10" stroke-width="2" class="tuer" id="tuer-b" style="transform-origin:445px 467px"/>
+          <path d="M545 399 A40 40 0 0 1 505 439" class="haar strich s" data-sicht="6-17"/>
+          <line x1="505" y1="399" x2="545" y2="399" stroke="#0F0F10" stroke-width="2" class="tuer" id="tuer-c" style="transform-origin:545px 399px"/>
+          <g class="lbl-k">
+            <text x="320" y="316">R01</text><text x="458" y="316">R02</text><text x="458" y="422">R03</text>
+          </g>
+
+          <!-- Stufe 1: Bestandsanalyse, Scan und Maßkette -->
+          <g class="s" data-sicht="1-2">
+            <rect x="300" y="285" width="40" height="230" fill="url(#scanVerlauf)">
+              <animate attributeName="x" values="276;584;276" dur="5.5s" repeatCount="indefinite"/>
+            </rect>
+            <line x1="300" y1="285" x2="300" y2="515" stroke="#0F0F10" stroke-width="1.5">
+              <animate attributeName="x1" values="316;624;316" dur="5.5s" repeatCount="indefinite"/>
+              <animate attributeName="x2" values="316;624;316" dur="5.5s" repeatCount="indefinite"/>
+            </line>
+          </g>
+          <g class="s" data-sicht="1">
+            <path d="M300 262 H600 M300 256 V268 M360 256 V268 M420 256 V268 M480 256 V268 M540 256 V268 M600 256 V268" class="haar"/>
+            <g class="lbl-k kategorien" text-anchor="middle">
+              <text x="330" y="249" class="halo"><tspan class="de">räumlich</tspan><tspan class="en">spatial</tspan></text>
+              <text x="390" y="233" class="halo"><tspan class="de">technisch</tspan><tspan class="en">technical</tspan></text>
+              <text x="450" y="249" class="halo"><tspan class="de">sozial</tspan><tspan class="en">social</tspan></text>
+              <text x="510" y="233" class="halo"><tspan class="de">wirtschaftlich</tspan><tspan class="en">economic</tspan></text>
+              <text x="570" y="249" class="halo"><tspan class="de">rechtlich</tspan><tspan class="en">legal</tspan></text>
+            </g>
+          </g>
+
+          <!-- Stufe 2: Konsens, drei Parteien an einem Tisch -->
+          <g class="s" data-sicht="2">
+            <rect x="425" y="532" width="50" height="10" fill="none" stroke="#0F0F10"/>
+            <path d="M340 588 L428 540 M450 604 L450 544 M560 588 L472 540" class="haar strich"/>
+            <g class="lbl-k" text-anchor="middle">
+              <g class="partei"><circle cx="340" cy="588" r="6" fill="#0F0F10"/><text x="340" y="611" class="halo"><tspan class="de">Gemeinde</tspan><tspan class="en">Municipality</tspan></text></g>
+              <g class="partei"><circle cx="450" cy="604" r="6" fill="#0F0F10"/><text x="450" y="627" class="halo"><tspan class="de">Nachbarschaft</tspan><tspan class="en">Neighbours</tspan></text></g>
+              <g class="partei"><circle cx="560" cy="588" r="6" fill="#0F0F10"/><text x="560" y="611" class="halo"><tspan class="de">Eigentümer:in</tspan><tspan class="en">Owner</tspan></text></g>
+            </g>
+            <rect x="443" y="526" width="14" height="14" fill="#FFD630" stroke="#0F0F10">
+              <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;.5;.6;1" dur="3s" repeatCount="indefinite"/>
+            </rect>
+          </g>
+
+          <!-- Stufe 4–5: Menschen (Pioniernutzung) -->
+          <g class="s" data-sicht="4-16">
+            <g transform="translate(350 380)"><circle r="5" fill="#0F0F10"><animateMotion dur="11s" repeatCount="indefinite" path="M0,0 C30,-40 60,10 40,60 C20,90 -20,40 0,0Z"/></circle></g>
+            <g transform="translate(395 450)"><circle r="5" fill="#0F0F10"><animateMotion dur="9s" repeatCount="indefinite" path="M0,0 C-30,-20 -40,-90 0,-110 C30,-80 20,-30 0,0Z"/></circle></g>
+            <g transform="translate(372 330)"><circle r="5" fill="#0F0F10"><animateMotion dur="13s" repeatCount="indefinite" path="M0,0 C20,30 -20,60 -30,30 C-35,10 -15,-10 0,0Z"/></circle></g>
+          </g>
+          <g class="s" data-sicht="6-16">
+            <g transform="translate(500 340)"><circle r="5" fill="#0F0F10"><animateMotion dur="10s" repeatCount="indefinite" path="M0,0 C40,-20 70,20 40,30 C20,35 -10,20 0,0Z"/></circle></g>
+            <g transform="translate(540 460)"><circle r="5" fill="#0F0F10"><animateMotion dur="12s" repeatCount="indefinite" path="M0,0 C-50,-20 -60,20 -20,30 C10,35 20,15 0,0Z"/></circle></g>
+            <g transform="translate(480 470)"><circle r="5" fill="#0F0F10"><animateMotion dur="8s" repeatCount="indefinite" path="M0,0 C20,-30 60,-20 50,10 C40,30 10,20 0,0Z"/></circle></g>
+          </g>
+
+          <!-- Stufe 5: Erkennen, Daten fließen in den Ring -->
+          <g class="s" data-sicht="6">
+            <g id="teilchen"></g>
+          </g>
+
+          <!-- Stufe 6: Präzisieren, Szenarien und Kennzahlen gegen Ziel -->
+          <g class="s" data-sicht="7-8">
+            <path d="M312 370 H440 M376 297 V503 M312 440 L440 330" class="haar strich" stroke-width="1.5"/>
+            <g class="lbl-k"><text x="318" y="364" class="halo">S1</text><text x="382" y="490" class="halo">S2</text><text x="410" y="352" class="halo">S3</text></g>
+            <g class="s" data-sicht="7-8">
+              <rect class="balken" x="352" y="560" width="22" height="40" fill="#0F0F10"/>
+              <rect class="balken" x="388" y="548" width="22" height="52" fill="#0F0F10"/>
+              <rect class="balken" x="424" y="566" width="22" height="34" fill="#0F0F10"/>
+              <rect class="balken" x="460" y="540" width="22" height="60" fill="#FFD630" stroke="#0F0F10"/>
+              <rect class="balken" x="496" y="552" width="22" height="48" fill="#0F0F10"/>
+            </g>
+            <path d="M340 600 H540" class="haar"/>
+            <path d="M340 552 H556" class="haar strich" stroke-width="1.5"/>
+            <text x="560" y="556" class="lbl-k halo"><tspan class="de">Ziel</tspan><tspan class="en">Target</tspan></text>
+            <text x="300" y="604" class="lbl-k halo">KPI</text>
+          </g>
+
+          <!-- Stufe 10: drei Fundamente, nacheinander -->
+          <g class="s" data-sicht="10-12">
+            <g><rect class="fb" x="318" y="536" width="82" height="14" fill="#0F0F10"/><rect class="fb" x="409" y="536" width="82" height="14" fill="#0F0F10"/><rect class="fb" x="500" y="536" width="82" height="14" fill="#0F0F10"/></g>
+            <g class="lbl-k" text-anchor="middle">
+              <text x="359" y="572" class="halo"><tspan class="de">Gemeinschaft</tspan><tspan class="en">Community</tspan></text>
+              <text x="450" y="572" class="halo"><tspan class="de">Struktur</tspan><tspan class="en">Structure</tspan></text>
+              <text x="541" y="572" class="halo"><tspan class="de">Wirtschaft</tspan><tspan class="en">Economy</tspan></text>
+            </g>
+          </g>
+          <!-- Stufe 11: digitaler Zwilling, zwei Schichten, Wissen fließt in beide Richtungen -->
+          <g class="s" data-sicht="11-12">
+            <path d="M324 261 H624 V491 H600 M324 261 V285 M300 285 L324 261 M600 285 L624 261 M600 515 L624 491" class="haar strich"/>
+            <g class="dz2"><path d="M344 241 H644 V471 H624 M344 241 V261 M324 261 L344 241 M624 261 L644 241 M624 491 L644 471" class="haar strich"/></g>
+            <text x="652" y="496" class="lbl-k halo">3D-SCAN</text>
+            <text x="652" y="246" class="lbl-k halo dz2"><tspan class="de">BIM-ARBEITSMODELL</tspan><tspan class="en">BIM WORKING MODEL</tspan></text>
+            <circle r="3.5" fill="#0F0F10"><animateMotion dur="2.6s" repeatCount="indefinite" path="M520,360 L634,251"/></circle>
+            <circle r="3.5" fill="#FFD630" stroke="#0F0F10"><animateMotion dur="2.6s" begin="1.3s" repeatCount="indefinite" path="M634,251 L520,360"/></circle>
+          </g>
+        </g>
+
+        <!-- Stufe 5: Leise bis laut, das Spektrum der Nutzungen  -->
+        <g id="leiselaut" class="s" data-sicht="5">
+          <rect x="207" y="306" width="486" height="190" fill="#fff" stroke="#0F0F10"/>
+          <text x="225" y="333" class="lbl-k"><tspan class="de">LEISE BIS LAUT · SPEKTRUM DER NUTZUNGEN</tspan><tspan class="en">QUIET TO LOUD · SPECTRUM OF USES</tspan></text>
+          <path d="M245 398 V420" class="haar"/><path d="M291 398 V420" class="haar"/><path d="M336 398 V420" class="haar"/><path d="M382 398 V420" class="haar"/><path d="M427 398 V420" class="haar"/><path d="M473 398 V420" class="haar"/><path d="M518 398 V420" class="haar"/><path d="M564 398 V420" class="haar"/><path d="M609 398 V420" class="haar"/><path d="M655 398 V420" class="haar"/>
+          <g class="pikto-reihe"><g class="pikto"><rect x="240" y="376" width="10" height="16" rx="5" class="haar"/><path d="M245 376 V382" class="haar"/></g><g class="pikto"><path d="M285 392 L285 375 M285 392 L293 377 M285 392 L299 383" class="haar" stroke-width="5" stroke-linecap="butt"/></g><g class="pikto"><rect x="327" y="388" width="18" height="4" class="haar"/><rect x="329" y="383" width="16" height="4" class="haar"/><rect x="327" y="378" width="18" height="4" class="haar"/></g><g class="pikto"><path d="M374 392 V382 L382 374 L390 382 V392 Z" class="haar"/><rect x="380" y="386" width="4" height="6" class="haar"/></g><g class="pikto"><rect x="417" y="379" width="20" height="13" class="haar"/><circle cx="427" cy="385.5" r="4" class="haar"/><rect x="420" y="376" width="6" height="3" class="haar"/></g><g class="pikto"><rect x="463" y="376" width="14" height="10" class="haar"/><rect x="469" y="382" width="14" height="10" fill="#fff" stroke="#0F0F10"/></g><g class="pikto"><rect x="509" y="376" width="18" height="16" class="haar"/><path d="M512 380 H524 M512 384 H524 M512 388 H520" class="haar"/></g><g class="pikto"><path d="M564 380 V393 M560 393 L564 387 L568 393" class="haar"/><path d="M558 378 A6 6 0 0 1 570 378 M554 375 A10 10 0 0 1 574 375" class="haar"/></g><g class="pikto"><circle cx="602" cy="379" r="2.2" fill="#0F0F10"/><circle cx="609" cy="379" r="2.2" fill="#0F0F10"/><circle cx="616" cy="379" r="2.2" fill="#0F0F10"/><circle cx="602" cy="385" r="2.2" fill="#0F0F10"/><circle cx="609" cy="385" r="2.2" fill="#0F0F10"/><circle cx="616" cy="385" r="2.2" fill="#0F0F10"/><circle cx="602" cy="391" r="2.2" fill="#0F0F10"/><circle cx="609" cy="391" r="2.2" fill="#0F0F10"/><circle cx="616" cy="391" r="2.2" fill="#0F0F10"/></g><g class="pikto"><circle cx="655" cy="379" r="5" class="haar"/><path d="M655 384 V393 M650 393 H660" class="haar"/></g></g>
+          <polygon points="245,421 655,421 655,437" fill="#FFD630" stroke="#0F0F10" stroke-width="1"/>
+          <path d="M245 421 H655" stroke="#0F0F10" stroke-width="2"/>
+          <g transform="translate(676 424)"><path d="M-8 -6 H-3 L4 -12 V12 L-3 6 H-8 Z" fill="#0F0F10"/>
+            <path d="M8 -6 A8 8 0 0 1 8 6" class="haar" stroke-width="1.5"><animate attributeName="opacity" values="0;1;1;0" dur="1.8s" repeatCount="indefinite"/></path>
+            <path d="M12 -10 A13 13 0 0 1 12 10" class="haar" stroke-width="1.5"><animate attributeName="opacity" values="0;1;1;0" dur="1.8s" begin=".3s" repeatCount="indefinite"/></path></g>
+          <text x="245" y="455" class="lbl-k"><tspan class="de">LEISE</tspan><tspan class="en">QUIET</tspan></text>
+          <text x="655" y="455" text-anchor="end" class="lbl-k"><tspan class="de">LAUT</tspan><tspan class="en">LOUD</tspan></text>
+          <g class="lbl-k" text-anchor="middle">
+            <g><rect x="236" y="466" width="128" height="20" fill="#FFD630" stroke="#0F0F10"/><text x="300" y="480"><tspan class="de">R01 · ARBEITEN</tspan><tspan class="en">R01 · WORK</tspan></text></g>
+            <g><rect x="386" y="466" width="128" height="20" fill="#fff" stroke="#0F0F10"/><text x="450" y="480"><tspan class="de">R02 · STUDIOS</tspan><tspan class="en">R02 · STUDIOS</tspan></text></g>
+            <g><rect x="536" y="466" width="128" height="20" fill="#fff" stroke="#0F0F10"/><text x="600" y="480"><tspan class="de">R03 · BÜHNE</tspan><tspan class="en">R03 · STAGE</tspan></text></g>
+          </g>
+        </g>
+
+        <!-- Stufe 12: Dauernutzung herstellen, mit Schleife bei der Einreichung -->
+        <g id="nachnutzung" class="s" data-sicht="12">
+          <rect x="222" y="292" width="456" height="216" fill="#fff" stroke="#0F0F10"/>
+          <text x="240" y="322" class="lbl-k"><tspan class="de">DAUERNUTZUNG HERSTELLEN</tspan><tspan class="en">ESTABLISHING PERMANENT USE</tspan></text>
+          <path d="M270 400 H630" class="haar" stroke-width="1.5"/>
+          <path d="M282 400 H372 M402 400 H492 M522 400 H612" class="haar" marker-end="url(#pfeil)"/>
+          <circle cx="390" cy="424" r="22" class="haar strich"/>
+          <g class="lbl" text-anchor="middle">
+            <rect x="259" y="389" width="22" height="22" fill="#fff" stroke="#0F0F10" stroke-width="2"/><text x="270" y="374" class="halo"><tspan class="de">Konzept</tspan><tspan class="en">Concept</tspan></text>
+            <rect x="379" y="389" width="22" height="22" fill="#FFD630" stroke="#0F0F10" stroke-width="2"/><text x="390" y="374" class="halo"><tspan class="de">Einreichung</tspan><tspan class="en">Permit</tspan></text>
+            <rect x="499" y="389" width="22" height="22" fill="#fff" stroke="#0F0F10" stroke-width="2"/><text x="510" y="374" class="halo"><tspan class="de">Umbau</tspan><tspan class="en">Conversion</tspan></text>
+            <rect x="619" y="389" width="22" height="22" fill="#0F0F10"/><text x="630" y="374" class="halo"><tspan class="de">Übergabe</tspan><tspan class="en">Handover</tspan></text>
+          </g>
+          <text x="390" y="470" text-anchor="middle" class="lbl-k"><tspan class="de">↺ NACHBESSERN, BIS VOLLSTÄNDIG</tspan><tspan class="en">↺ REVISE UNTIL COMPLETE</tspan></text>
+          <rect x="-6" y="-6" width="12" height="12" fill="#FFD630" stroke="#0F0F10" stroke-width="1.5">
+            <animateMotion dur="7s" repeatCount="indefinite" path="M270,400 L390,400 A22,22 0 1,0 390.01,400 L630,400"/>
+          </rect>
+        </g>
+
+        <!-- Stufe 3: Rekursion. Anforderungen abstimmen, Rn wird Rn+1 -->
+        <g id="rekursion" class="s" data-sicht="3">
+          <circle cx="450" cy="400" r="150" fill="#fff" stroke="#0F0F10" stroke-width="1"/>
+          <circle cx="450" cy="400" r="150" fill="none" stroke="#0F0F10" stroke-width="3" stroke-dasharray="40 902.5">
+            <animateTransform attributeName="transform" type="rotate" from="-90 450 400" to="270 450 400" dur="6s" repeatCount="indefinite"/>
+          </circle>
+          <g class="lbl" text-anchor="middle">
+            <rect x="439" y="239" width="22" height="22" fill="#FFD630" stroke="#0F0F10" stroke-width="2"/>
+            <text x="450" y="228" class="halo"><tspan class="de">Erheben</tspan><tspan class="en">Gather</tspan></text>
+            <rect x="589" y="389" width="22" height="22" fill="#fff" stroke="#0F0F10" stroke-width="2"/>
+            <text x="622" y="405" text-anchor="start" class="halo"><tspan class="de">Prüfen</tspan><tspan class="en">Check</tspan></text>
+            <rect x="439" y="539" width="22" height="22" fill="#fff" stroke="#0F0F10" stroke-width="2"/>
+            <text x="450" y="584" class="halo"><tspan class="de">Freigeben</tspan><tspan class="en">Approve</tspan></text>
+            <rect x="289" y="389" width="22" height="22" fill="#0F0F10"/>
+            <text x="278" y="405" text-anchor="end" class="halo">Rₙ₊₁</text>
+          </g>
+          <!-- Schleife im Kreis: Anpassen und neu prüfen -->
+          <path d="M612 392 C665 330 700 400 652 420 C635 427 622 418 614 410" class="haar" marker-end="url(#pfeil)"/>
+          <text x="660" y="352" class="lbl-k halo"><tspan class="de">ANPASSEN ↺</tspan><tspan class="en">ADJUST ↺</tspan></text>
+          <text x="450" y="412" text-anchor="middle" style="font-size:44px" id="r-zahl">R₁</text>
+          <text x="450" y="444" text-anchor="middle" class="lbl-k"><tspan class="de">ANFORDERUNGEN</tspan><tspan class="en">REQUIREMENTS</tspan></text>
+        </g>
+      </g>
+
+      <!-- Werkzeug-Schiene -->
+      <g id="schiene">
+        <text x="880" y="96" class="lbl-k"><tspan class="de">VIER WERKZEUGE</tspan><tspan class="en">FOUR TOOLS</tspan></text>
+        <g id="karten"></g>
+      </g>
+    </svg>
+    <div class="leiste mono">
+      <span class="masz" id="masz">M 1:200</span>
+      <span id="stand"></span>
+      <span class="pegel mono" aria-hidden="true" title="Leise bis laut"><span class="wort"><span class="de">LEISE</span><span class="en">QUIET</span></span><svg viewBox="0 0 62 16"><rect x="1" y="13.6" width="4" height="1.4"/><rect x="7" y="12.2" width="4" height="2.8"/><rect x="13" y="10.8" width="4" height="4.2"/><rect x="19" y="9.4" width="4" height="5.6"/><rect x="25" y="8.0" width="4" height="7.0"/><rect x="31" y="6.6" width="4" height="8.4"/><rect x="37" y="5.2" width="4" height="9.8"/><rect x="43" y="3.8" width="4" height="11.2"/><rect x="49" y="2.4" width="4" height="12.6"/><rect x="55" y="1.0" width="4" height="14.0"/></svg><span class="wort"><span class="de">LAUT</span><span class="en">LOUD</span></span></span>
+      <span id="zaehler">00/09</span>
+    </div>
+  </div>
+
+  <ol class="schritte">
+    <li class="schritt" data-stufe="0">
+      <p class="kicker mono"><span class="de">Lesart</span><span class="en">How to read it</span></p>
+      <h2><span class="de">Kein Übergangszustand, sondern eine aktive Entwicklungsphase</span><span class="en">Not a transitional state, but an active phase of development</span></h2>
+      <p><span class="de">Die Pioniernutzung ersetzt keine langfristige Planung, sondern liefert die dafür notwendigen Erkenntnisse. In der Mitte liegt der Ort als Grundriss, außen der Prozess, innen laufen die Daten mit. Gelb ist, was belegt oder gerade aktiv ist.</span><span class="en">Pioneer use does not replace long-term planning; it provides the insights that planning needs. The place sits at the centre as a floor plan, the process runs around it and the data runs alongside on the inside. Yellow marks what is occupied or active right now.</span></p>
+    </li>
+    <li class="schritt" data-stufe="1">
+      <p class="kicker mono"><span class="tag">Phase 0</span><span class="tag gelb">BA</span></p>
+      <h2><span class="de">Erfassen, ordnen, bewerten</span><span class="en">Record, organise, assess</span></h2>
+      <p><span class="de">Die Arbeit beginnt mit einer offenen Untersuchung des Standorts. Nutzungen oder bauliche Maßnahmen werden nicht vorweggenommen. Erfasst werden der bauliche Bestand, die bestehende Nutzung, das räumliche Umfeld und mögliche Entwicklungsperspektiven.</span><span class="en">Work begins with an open investigation of the site. No uses or building measures are anticipated. We record the existing fabric, the current use, the surroundings and possible development perspectives.</span></p>
+      <ul class="chips">
+        <li><span class="de">Bestand dokumentieren</span><span class="en">Document the building</span></li>
+        <li><span class="de">Wissen sichern</span><span class="en">Secure existing knowledge</span></li>
+        <li><span class="de">Netzwerk aktivieren</span><span class="en">Activate the network</span></li>
+        <li class="raus"><span class="de">Nicht bereit: zurückgestellt</span><span class="en">Not ready: put on hold</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="2">
+      <p class="kicker mono"><span class="tag">Phase 0</span><span class="tag gelb">BA</span></p>
+      <h2><span class="de">Vorbereitung und Adaptierung</span><span class="en">Preparation and adaptation</span></h2>
+      <p><span class="de">Der Umsetzungsrahmen wird mit den Beteiligten geklärt und freigegeben. Bauliche Eingriffe beschränken sich auf das technisch erforderliche Mindestmaß für einen sicheren und funktionierenden Betrieb. Parallel beginnt die Ansprache potenzieller Nutzer:innen.</span><span class="en">The framework for implementation is clarified with everyone involved and approved. Building work is limited to the technical minimum needed for safe, functioning operation. In parallel, we start approaching potential users.</span></p>
+      <ul class="chips">
+        <li><span class="de">Rahmen klären und freigeben</span><span class="en">Clarify and approve the framework</span></li>
+        <li><span class="de">Sanitär, Energie, Daten</span><span class="en">Sanitation, energy, data</span></li>
+        <li><span class="de">Zugang und Erschließung</span><span class="en">Access and circulation</span></li>
+        <li><span class="de">Nutzer:innen ansprechen</span><span class="en">Approach users</span></li>
+        <li class="raus"><span class="de">Abgelehnt: kein Auftrag</span><span class="en">Declined: no contract</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="3">
+      <p class="kicker mono"><span class="tag"><span class="de">Rekursiv</span><span class="en">Recursive</span></span></p>
+      <h2><span class="de">„Etwas geschieht, weil etwas geschieht, weil etwas geschieht.“</span><span class="en">“Something happens because something happens because something happens.”</span></h2>
+      <p class="mono zitat">Jan Gehl, <i>Cities for People</i></p>
+      <p><span class="de">Jede Phase baut auf den Erkenntnissen der vorhergehenden auf. In jeder Runde werden die Anforderungen der Beteiligten erhoben, geprüft, angepasst und freigegeben: Aus R₁ wird R₂. Erweiterungen erfolgen ausschließlich auf Grundlage realer Nutzungserfahrungen und werden nicht vorweggenommen.</span><span class="en">Every phase builds on what the previous one has shown. In every round, the requirements of everyone involved are gathered, checked, adjusted and approved: R₁ becomes R₂. Extensions are based solely on real experience of use and are never anticipated.</span></p>
+    </li>
+    <li class="schritt" data-stufe="4">
+      <p class="kicker mono"><span class="tag"><span class="de">Schritt 01</span><span class="en">Step 01</span></span><span class="tag gelb">PN</span></p>
+      <h2><span class="de">Öffnen</span><span class="en">Open</span></h2>
+      <p><span class="de">Die ersten Flächen werden bezogen und aktiv genutzt. Zuerst jene Bereiche, die mit geringem Adaptierungsaufwand sofort betriebsfähig sind und eine hohe Außenwirkung entfalten. Die Pioniernutzung ist dabei ein methodisches Werkzeug.</span><span class="en">The first spaces are occupied and put to active use, starting with the areas that can operate straight away with little adaptation and that have a strong public presence. Pioneer use serves as a methodological tool.</span></p>
+      <ul class="chips">
+        <li><span class="de">Erster Betrieb und Bezug</span><span class="en">First operation and move-in</span></li>
+        <li><span class="de">Erste Nutzungsformate</span><span class="en">First formats of use</span></li>
+        <li><span class="de">Übergabe</span><span class="en">Handover</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="5">
+      <p class="kicker mono"><span class="tag"><span class="de">Schritt 01</span><span class="en">Step 01</span></span><span class="tag gelb">PN</span></p>
+      <h2><span class="de">Leise bis laut</span><span class="en">From quiet to loud</span></h2>
+      <p><span class="de">Nicht jede Nutzung wirkt gleich nach außen. Die Pioniernutzung reicht vom ruhigen Arbeitsplatz und Atelier über Studios und Produktion bis zu Formaten mit Publikum, Bühne und Sendung. Ruhige Arbeitsnutzungen brauchen kleinteilige, beheizbare Räume, öffentliche und temporäre Formate eher Halle und Freiraum. Die Mischung entscheidet, wie laut ein Ort nach außen wirkt.</span><span class="en">Not every use has the same presence. Pioneer use ranges from quiet desks and studios through production to formats with an audience, a stage and a broadcast. Quiet work needs small, heated rooms; public and temporary formats suit halls and open space. The mix decides how loud a place is to the outside.</span></p>
+      <ul class="chips">
+        <li><span class="de">Arbeiten, Gestalten</span><span class="en">Work, design</span></li>
+        <li><span class="de">Produzieren, Studios</span><span class="en">Production, studios</span></li>
+        <li><span class="de">Publikum, Bühne, Senden</span><span class="en">Audience, stage, broadcast</span></li>
+      </ul>
+      <p class="mono zitat"><span class="anon"><span class="de">Skala nach einer Grafik von NEST, 2025</span><span class="en">Scale after a NEST graphic, 2025</span></span></p>
+    </li>
+    <li class="schritt" data-stufe="6">
+      <p class="kicker mono"><span class="tag"><span class="de">Schritt 02</span><span class="en">Step 02</span></span><span class="tag gelb">BA</span></p>
+      <h2><span class="de">Erkennen</span><span class="en">Recognise</span></h2>
+      <p><span class="de">Der Betrieb erfolgt unter realen Bedingungen. Er dient nicht nur der Nutzung der Flächen, sondern auch der Überprüfung der zugrunde liegenden Annahmen. Nutzungen, die sich bewähren, werden stabilisiert. Weitere Flächen kommen erst auf Grundlage konkreter Nutzungserfahrungen dazu.</span><span class="en">Operation takes place under real conditions. It serves not only to use the spaces but also to test the assumptions behind them. Uses that prove themselves are stabilised. Further spaces are only added on the basis of concrete experience of use.</span></p>
+      <ul class="chips">
+        <li><span class="de">Nachfrage</span><span class="en">Demand</span></li>
+        <li><span class="de">Flächeneignung</span><span class="en">Suitability of space</span></li>
+        <li><span class="de">Organisation und Abläufe</span><span class="en">Organisation and processes</span></li>
+        <li><span class="de">Erweiterung</span><span class="en">Expansion</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="7">
+      <p class="kicker mono"><span class="tag"><span class="de">Schritt 03</span><span class="en">Step 03</span></span><span class="tag gelb">NK</span></p>
+      <h2><span class="de">Präzisieren</span><span class="en">Refine</span></h2>
+      <p><span class="de">Die Erfahrungen aus Betrieb, Nutzung und Organisation werden systematisch ausgewertet und verdichtet: zur Flächeneignung, zur Nachfrage, zum organisatorischen Aufwand und zur Wirtschaftlichkeit einzelner Nutzungsbausteine. Tragfähige Nutzungen schaffen den Rahmen, in dem auch weniger ertragsorientierte Formate möglich werden.</span><span class="en">Experience from operation, use and organisation is systematically evaluated and consolidated: on the suitability of space, demand, organisational effort and the economics of individual uses. Viable uses create the framework in which less profit-oriented formats also become possible.</span></p>
+      <ul class="chips">
+        <li><span class="de">Verdichtung und Auswertung</span><span class="en">Consolidation and evaluation</span></li>
+        <li><span class="de">Entscheidungsgrundlage</span><span class="en">Basis for decisions</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="8">
+      <p class="kicker mono"><span class="tag"><span class="de">Zyklisch</span><span class="en">Cyclical</span></span></p>
+      <h2><span class="de">Entscheidungsräume, keine fixierten Zeitabläufe</span><span class="en">Decision spaces, not fixed timelines</span></h2>
+      <p><span class="de">Entscheidungen können schrittweise getroffen, Maßnahmen angepasst oder pausiert werden. Die Entscheidung liegt bei den Eigentümer:innen. NEST übersetzt die Erkenntnisse in belastbare Entscheidungsgrundlagen. Drei Wege führen zurück in den Kreis, einer hinaus.</span><span class="en">Decisions can be taken step by step, and measures adjusted or paused. The decision rests with the owners. NEST translates the findings into a sound basis for that decision. Three paths lead back into the cycle, one leads out.</span></p>
+      <ul class="chips">
+        <li><span class="de">Verlängern → Öffnen</span><span class="en">Extend → open</span></li>
+        <li><span class="de">Anpassen → Vorbereitung</span><span class="en">Adjust → preparation</span></li>
+        <li><span class="de">Beenden → Erfassen</span><span class="en">End → record</span></li>
+        <li><span class="de">Verstetigen → Übergang</span><span class="en">Sustain → transition</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="9">
+      <p class="kicker mono"><span class="tag"><span class="de">Schritt 04</span><span class="en">Step 04</span></span></p>
+      <h2><span class="de">Verstetigen: Übergang statt Endpunkt</span><span class="en">Sustain: a transition, not an end point</span></h2>
+      <p><span class="de">Entscheidet sich die Eigentümer:in für die Verstetigung, verlässt der Ort den Kreis. Die Auswertung markiert keinen Endpunkt, sondern den Übergang von der Pioniernutzung in eine langfristige Entwicklungsperspektive. Was sich im Betrieb bewährt hat, wird zur Grundlage der Dauernutzung.</span><span class="en">If the owner decides to sustain the use, the place leaves the cycle. The evaluation is not an end point but the transition from pioneer use to a long-term development perspective. What has proved itself in operation becomes the basis for permanent use.</span></p>
+    </li>
+    <li class="schritt" data-stufe="10">
+      <p class="kicker mono"><span class="tag"><span class="de">Schritt 04</span><span class="en">Step 04</span></span></p>
+      <h2><span class="de">Drei Fundamente</span><span class="en">Three foundations</span></h2>
+      <p><span class="de">Verstetigt ist ein Ort, wenn drei Fundamente stehen: eine aktive Gemeinschaft, die ihn trägt, eine flexible, robuste Struktur, die Nutzung ermöglicht, und ein wirtschaftliches Modell, das ihn langfristig erhält. Eine Mischung aus gut vermietbaren Arbeitsflächen, öffentlichen Räumen und saisonalen Formaten verbindet unterschiedliche Ertragslogiken und streut das Risiko.</span><span class="en">A place is sustained when three foundations stand: an active community that carries it, a flexible, robust structure that allows use, and an economic model that keeps it going in the long term. A mix of lettable workspace, public rooms and seasonal formats combines different revenue logics and spreads the risk.</span></p>
+      <ul class="chips">
+        <li><span class="de">Gemeinschaft</span><span class="en">Community</span></li>
+        <li><span class="de">Struktur</span><span class="en">Structure</span></li>
+        <li><span class="de">Wirtschaft</span><span class="en">Economy</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="11">
+      <p class="kicker mono"><span class="tag"><span class="de">Schritt 04</span><span class="en">Step 04</span></span><span class="tag gelb">DZ</span></p>
+      <h2><span class="de">Der digitale Zwilling wächst mit</span><span class="en">The digital twin grows along</span></h2>
+      <p><span class="de">Die digitale Bestandsaufnahme ist keine einmalige Momentaufnahme, sondern eine erweiterbare Struktur. Aus dem 3D-Scan entsteht schrittweise ein BIM-fähiges Arbeitsmodell. Erkenntnisse aus Nutzung, Instandhaltung und Umbau fließen laufend ein, und umgekehrt dient das Modell als Grundlage für Planung, Auswertung und Kosten.</span><span class="en">The digital survey is not a one-off snapshot but an extendable structure. Step by step, the 3D scan becomes a BIM-ready working model. Insights from use, maintenance and conversion flow into it continuously, and in turn the model serves as the basis for planning, evaluation and costs.</span></p>
+      <ul class="chips">
+        <li><span class="de">3D-Scan</span><span class="en">3D scan</span></li>
+        <li><span class="de">BIM-Arbeitsmodell</span><span class="en">BIM working model</span></li>
+        <li><span class="de">Betriebskosten</span><span class="en">Operating costs</span></li>
+        <li><span class="de">Wissen in beide Richtungen</span><span class="en">Knowledge in both directions</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="12">
+      <p class="kicker mono"><span class="tag"><span class="de">Schritt 04</span><span class="en">Step 04</span></span><span class="tag gelb">DZ</span></p>
+      <h2><span class="de">Dauernutzung herstellen</span><span class="en">Establishing permanent use</span></h2>
+      <p><span class="de">Auf Grundlage der Erfahrungen entsteht ein Konzept für die Nachnutzung. Die Einreichung wird so lange nachgebessert, bis die Behörde sie als vollständig annimmt. Dann folgen Sanierung oder Umbau und die Übergabe an die Nutzer:innen. Weitergehende Eingriffe wurden bis hierher bewusst nicht vorweggenommen: Der Bestand bleibt anschlussfähig.</span><span class="en">A concept for long-term use is developed from the experience gained. The permit application is revised until the authority accepts it as complete. Refurbishment or conversion follows, then the handover to the users. Further interventions were deliberately not anticipated up to this point, so the building stays open to what comes next.</span></p>
+      <ul class="chips">
+        <li><span class="de">Konzept Nachnutzung</span><span class="en">Concept for long-term use</span></li>
+        <li><span class="de">Einreichung ↺</span><span class="en">Permit application ↺</span></li>
+        <li><span class="de">Sanierung und Umbau</span><span class="en">Refurbishment and conversion</span></li>
+        <li><span class="de">Übergabe</span><span class="en">Handover</span></li>
+      </ul>
+    </li>
+    <li class="schritt" data-stufe="13">
+      <p class="kicker mono"><span class="tag"><span class="de">Bauteil für Bauteil</span><span class="en">Part by part</span></span><span class="tag gelb">BA</span></p>
+      <h2><span class="de">Bauteil für Bauteil</span><span class="en">Part by part</span></h2>
+      <p><span class="de">Der Kreis, der bis hierher zu sehen war, ist der eines einzigen Bauteils. Der Bestand wird in klar definierte Bauteile gegliedert. Die Gliederung legt keine Nutzungen fest, sondern macht Eignung, Aufwand und Entwicklungspotenzial einzelner Bereiche bewertbar. Unterschiede im Bestand werden nicht nivelliert, sondern genutzt.</span><span class="en">The cycle shown so far belongs to a single part of the building. The existing building is divided into clearly defined parts. The division does not fix any uses; it makes the suitability, effort and development potential of each area assessable. Differences in the building are not levelled out but put to use.</span></p>
+    </li>
+    <li class="schritt" data-stufe="14">
+      <p class="kicker mono"><span class="tag"><span class="de">Bauteil für Bauteil</span><span class="en">Part by part</span></span><span class="tag gelb">PN</span></p>
+      <h2><span class="de">A: der Startbaustein</span><span class="en">A: the starting block</span></h2>
+      <p><span class="de">Begonnen wird dort, wo der Bestand mit geringem Adaptierungsaufwand sofort betriebsfähig ist und eine hohe Außenwirkung entfaltet: gute Substanz, klare Erschließung, hohe Sichtbarkeit. Die Bezeichnung von A bis E folgt der Reihenfolge der Aktivierung.</span><span class="en">Work starts where the building can operate straight away with little adaptation and has a strong public presence: sound fabric, clear access, high visibility. The letters A to E follow the order of activation.</span></p>
+    </li>
+    <li class="schritt" data-stufe="15">
+      <p class="kicker mono"><span class="tag"><span class="de">Bauteil für Bauteil</span><span class="en">Part by part</span></span><span class="tag gelb">PN</span><span class="tag gelb">BA</span></p>
+      <h2><span class="de">B und C: Erweiterung und Freiraum</span><span class="en">B and C: expansion and open space</span></h2>
+      <p><span class="de">Was A zeigt, entscheidet über B. Die Erweiterung wird erst aktiviert, wenn Nachfrage und Erfahrungen sie begründen. C verbindet Gebäude und Freiraum und öffnet das Areal saisonal nach außen. Jeder Bauteil durchläuft dabei seinen eigenen Kreis.</span><span class="en">What A shows decides B. The expansion is only activated once demand and experience justify it. C links building and open space and opens the site to the outside, season by season. Each part runs through its own cycle.</span></p>
+    </li>
+    <li class="schritt" data-stufe="16">
+      <p class="kicker mono"><span class="tag"><span class="de">Bauteil für Bauteil</span><span class="en">Part by part</span></span><span class="tag gelb">NK</span><span class="tag gelb">DZ</span></p>
+      <h2><span class="de">D und E: Reserve und Perspektive</span><span class="en">D and E: reserve and perspective</span></h2>
+      <p><span class="de">Manche Bauteile bleiben bewusst Entwicklungsreserve oder Perspektive. Sie werden mitgeführt, aber erst aktiviert, wenn Verfügbarkeit und Erkenntnisse aus den vorgelagerten Bauteilen es erlauben. So bleibt das Ganze jederzeit steuerbar: Maßnahmen können angepasst oder pausiert werden.</span><span class="en">Some parts deliberately remain a development reserve or a perspective. They are kept in the plan but only activated once availability and the insights from earlier parts allow it. The whole remains steerable at all times: measures can be adjusted or paused.</span></p>
+    </li>
+    <li class="schritt" data-stufe="17">
+      <p class="kicker mono"><span class="tag"><span class="de">Rekursiv im Maßstab</span><span class="en">Recursive in scale</span></span></p>
+      <h2><span class="de">Derselbe Kreis in jedem Maßstab</span><span class="en">The same cycle at every scale</span></h2>
+      <p><span class="de">Raum, Bauteil, Areal, Quartier: Die Blockaden sind in jedem Maßstab dieselben. Deshalb läuft überall derselbe Kreis, ob es um 250 Quadratmeter oder um 500 Hektar geht.</span><span class="en">Room, building part, site, neighbourhood: the obstacles are the same at every scale. That is why the same cycle runs everywhere, whether the area is 250 square metres or 500 hectares.</span></p>
+    </li>
+  </ol>
+</section>
+
+<section class="schluss wrap">
+  <h2><span class="de">Legende</span><span class="en">Key</span></h2>
+  <ul class="legende">
+    <li><svg viewBox="0 0 44 28"><rect x="4" y="4" width="36" height="20" fill="#0F0F10"/></svg><span><span class="de">Wand, massiv: der Bestand</span><span class="en">Solid wall: the existing building</span></span></li>
+    <li><svg viewBox="0 0 44 28"><rect x="4" y="4" width="36" height="20" fill="#FFD630"/></svg><span><span class="de">Gelb: belegt oder gerade aktiv</span><span class="en">Yellow: occupied or active</span></span></li>
+    <li><svg viewBox="0 0 44 28"><path d="M4 14 H40" stroke="#0F0F10" stroke-dasharray="1 5" stroke-width="2"/></svg><span><span class="de">Daten, laufend erfasst</span><span class="en">Data, recorded throughout</span></span></li>
+    <li><svg viewBox="0 0 44 28"><circle cx="22" cy="14" r="10" fill="none" stroke="#0F0F10"/><circle cx="22" cy="4" r="2.5" fill="#0F0F10"/></svg><span><span class="de">Kleiner Kreis im Knoten: Anforderungen abstimmen (rekursiv)</span><span class="en">Small loop at a node: aligning requirements (recursive)</span></span></li>
+  </ul>
+</section>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const svg = document.getElementById('grafik');
+  const NS = 'http://www.w3.org/2000/svg';
+  const C = { x: 450, y: 400 }, R = 290;
+  const pt = (deg, r = R) => { const a = deg * Math.PI / 180; return [C.x + r * Math.cos(a), C.y + r * Math.sin(a)]; };
+  const el = (name, attrs = {}, parent) => { const n = document.createElementNS(NS, name); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+  const bi = (parent, de, en) => { el('tspan', { class: 'de' }, parent).textContent = de; el('tspan', { class: 'en' }, parent).textContent = en; };
+
+  // Knoten des Kreislaufs: Winkel im Uhrzeigersinn, Start bei 160°
+  const KNOTEN = [
+    { id: 'e1', w: 160, k: ['PHASE 0', 'PHASE 0'], t: ['Erfassen', 'Record'], seite: 'links' },
+    { id: 'e2', w: 200, k: ['PHASE 0', 'PHASE 0'], t: ['Vorbereiten', 'Prepare'], seite: 'links' },
+    { id: 'e3', w: 270, k: ['01', '01'], t: ['Öffnen', 'Open'], seite: 'oben' },
+    { id: 'e4', w: 360, k: ['02 · TAKT', '02 · CYCLE'], t: ['Erkennen', 'Recognise'], seite: 'rechts' },
+    { id: 'e5', w: 450, k: ['03', '03'], t: ['Präzisieren', 'Refine'], seite: 'unten' },
+  ];
+  const kG = document.getElementById('knoten');
+  KNOTEN.forEach(n => {
+    const [x, y] = pt(n.w);
+    const g = el('g', { class: 'knoten', id: 'k-' + n.id }, kG);
+    el('use', { href: '#mini', x: x - 26, y: y - 26, width: 52, height: 52, class: 's', 'data-sicht': '3-17' }, g);
+    el('rect', { x: x - 11, y: y - 11, width: 22, height: 22 }, g);
+    let tx = x, ty = y, anchor = 'middle', dy1 = -52, dy2 = -34;
+    if (n.seite === 'links') { tx = x - 40; anchor = 'end'; dy1 = -6; dy2 = 14; }
+    if (n.seite === 'rechts') { tx = x + 40; anchor = 'start'; dy1 = -6; dy2 = 14; }
+    if (n.seite === 'unten') { tx = x + 38; anchor = 'start'; dy1 = 22; dy2 = 42; }
+    const t1 = el('text', { x: tx, y: ty + dy1, 'text-anchor': anchor, class: 'lbl-k halo' }, g); bi(t1, ...n.k);
+    const t2 = el('text', { x: tx, y: ty + dy2, 'text-anchor': anchor, class: 'lbl-b halo' }, g); bi(t2, ...n.t);
+  });
+
+  // Rücksprünge: konzentrische Bögen außen, ab Präzisieren (90°) im Uhrzeigersinn
+  const bogen = (a0, a1, r) => { const [x0, y0] = pt(a0, r), [x1, y1] = pt(a1, r); return `M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(1)},${y1.toFixed(1)}`; };
+  const rueck = { 'r-verl': [96, 262, 312], 'r-anp': [96, 192, 330], 'r-bee': [96, 152, 348] };
+  for (const id in rueck) document.getElementById(id).setAttribute('d', bogen(...rueck[id]));
+
+  // Werkzeug-Karten
+  const WERKZEUGE = [
+    { id: 'BA', t: ['Bestands-', 'analyse'], e: ['Building', 'analysis'] },
+    { id: 'PN', t: ['Pionier-', 'nutzung'], e: ['Pioneer', 'use'] },
+    { id: 'NK', t: ['Nutzungs-', 'konzept'], e: ['Use concept', 'and economics'] },
+    { id: 'DZ', t: ['Digitaler', 'Zwilling'], e: ['Digital', 'twin'] },
+  ];
+  const kartenG = document.getElementById('karten');
+  WERKZEUGE.forEach((w, i) => {
+    const y = 112 + i * 100;
+    const g = el('g', { class: 'karte', id: 'w-' + w.id }, kartenG);
+    el('rect', { x: 880, y, width: 200, height: 84 }, g);
+    el('text', { x: 896, y: y + 54, class: 'code' }, g).textContent = w.id;
+    const a = el('text', { x: 960, y: y + 37, class: 'lbl-b', style: 'font-size:15px' }, g); bi(a, w.t[0], w.e[0]);
+    const b = el('text', { x: 960, y: y + 57, class: 'lbl-b', style: 'font-size:15px' }, g); bi(b, w.t[1], w.e[1]);
+  });
+
+  // Datenteilchen: vom Grundriss in den Datenring
+  const tG = document.getElementById('teilchen');
+  [200, 245, 290, 330, 20, 60, 110, 150].forEach((w, i) => {
+    const [x, y] = pt(w, 240);
+    const c = el('circle', { r: 3.5, fill: '#0F0F10' }, tG);
+    el('animateMotion', { dur: '3.2s', begin: (i * .4) + 's', repeatCount: 'indefinite', path: `M450,400 L${x.toFixed(1)},${y.toFixed(1)}` }, c);
+    el('animate', { attributeName: 'opacity', values: '0;1;1;0', keyTimes: '0;.15;.8;1', dur: '3.2s', begin: (i * .4) + 's', repeatCount: 'indefinite' }, c);
+  });
+
+  // Stufen
+  const UMFANG = 2 * Math.PI * R;
+  const fort = document.getElementById('fortschritt');
+  fort.style.strokeDasharray = UMFANG; fort.style.strokeDashoffset = UMFANG;
+  const zeichnen = [...document.querySelectorAll('.zeichnen')];
+  zeichnen.forEach(p => { const l = p.getTotalLength(); p.style.strokeDasharray = l; p.style.strokeDashoffset = l; p.dataset.l = l; });
+
+  const STUFEN = [
+    { p: 0,    k: [],                   w: [],     r: [],             m: 'M 1:200',  s: ['Lesart', 'How to read it'] },
+    { p: 0,    k: ['e1'],               w: ['BA'], r: [],             m: 'M 1:200',  s: ['Phase 0 · Erfassen, ordnen, bewerten', 'Phase 0 · Record, organise, assess'] },
+    { p: 40,   k: ['e2'],               w: ['BA'], r: [],             m: 'M 1:200',  s: ['Phase 0 · Vorbereitung und Adaptierung', 'Phase 0 · Preparation and adaptation'] },
+    { p: 40,   k: ['e2'],               w: [],     r: [],             m: 'M 1:200',  s: ['Rekursiv · Rₙ → Rₙ₊₁', 'Recursive · Rₙ → Rₙ₊₁'] },
+    { p: 110,  k: ['e3'],               w: ['PN'], r: ['a'],          m: 'M 1:200',  s: ['Schritt 01 · Öffnen', 'Step 01 · Open'] },
+    { p: 110,  k: ['e3'],               w: ['PN'], r: ['a'],          m: 'M 1:200',  s: ['Leise bis laut', 'Quiet to loud'] },
+    { p: 200,  k: ['e4'],               w: ['BA'], r: ['a', 'b', 'c'], m: 'M 1:200', s: ['Schritt 02 · Erkennen', 'Step 02 · Recognise'] },
+    { p: 290,  k: ['e5'],               w: ['NK'], r: ['a', 'b'],     m: 'M 1:200',  s: ['Schritt 03 · Präzisieren', 'Step 03 · Refine'] },
+    { p: 290,  k: ['e5'],               w: ['NK'], r: ['a', 'b'],     m: 'M 1:200',  s: ['Entscheidungsraum', 'Decision space'] },
+    { p: 290, k: [], w: [],     r: ['a', 'b', 'c'], m: 'M 1:200',  s: ['Schritt 04 · Übergang', 'Step 04 · Transition'] },
+    { p: 290, k: [], w: [],     r: ['a', 'b', 'c'], m: 'M 1:200',  s: ['Schritt 04 · Drei Fundamente', 'Step 04 · Three foundations'] },
+    { p: 290, k: [], w: ['DZ'], r: ['a', 'b', 'c'], m: 'M 1:200',  s: ['Schritt 04 · Digitaler Zwilling', 'Step 04 · Digital twin'] },
+    { p: 290, k: [], w: ['DZ'], r: ['a', 'b', 'c'], m: 'M 1:200',  s: ['Schritt 04 · Dauernutzung herstellen', 'Step 04 · Establishing permanent use'] },
+    { p: 360, k: [], w: ['BA'], r: ['a', 'b', 'c'], b: [],              m: 'M 1:1000', s: ['Bauteil für Bauteil · Gliedern', 'Part by part · Structure'] },
+    { p: 360, k: [], w: ['PN'], r: ['a', 'b', 'c'], b: ['a'],           m: 'M 1:1000', s: ['Bauteil A · Start', 'Part A · Start'] },
+    { p: 360, k: [], w: ['PN', 'BA'], r: ['a', 'b', 'c'], b: ['a', 'b', 'c'], m: 'M 1:1000', s: ['Bauteile B und C · Erweiterung, Freiraum', 'Parts B and C · Expansion, open space'] },
+    { p: 360, k: [], w: ['NK', 'DZ'], r: ['a', 'b', 'c'], b: ['a', 'b', 'c'], m: 'M 1:1000', s: ['Bauteile D und E · Reserve, Perspektive', 'Parts D and E · Reserve, perspective'] },
+    { p: 360, k: [], w: ['BA', 'PN', 'NK', 'DZ'], r: ['a', 'b', 'c'], m: 'M 1:5000', s: ['Maßstab · Quartier', 'Scale · Neighbourhood'] },
+  ];
+  const PEGEL = [0, 0, 1, 1, 3, 5, 5, 5, 5, 6, 6, 6, 7, 3, 4, 7, 7, 9];
+  const sichtbar = (spec, n) => spec.split(',').some(t => { const [a, b] = t.split('-').map(Number); return b === undefined ? n === a : n >= a && n <= b; });
+  const tueren = { 'tuer-a': [4, -90], 'tuer-b': [6, 90], 'tuer-c': [6, -90] };
+  let stufe = -1, rTimer = null;
+
+  function setze(n) {
+    if (n === stufe) return; stufe = n; const S = STUFEN[n]; const lang = root.dataset.lang;
+    root.dataset.stufe = n;
+    document.querySelectorAll('[data-sicht]').forEach(e => e.classList.toggle('an', sichtbar(e.dataset.sicht, n)));
+    fort.style.strokeDashoffset = UMFANG * (1 - S.p / 360);
+    const reihen = ['e1', 'e2', 'e3', 'e4', 'e5'];
+    const aktivIdx = S.k.length ? reihen.indexOf(S.k[0]) : (n >= 9 ? 5 : -1);
+    reihen.forEach((id, i) => { const k = document.getElementById('k-' + id); k.classList.toggle('aktiv', S.k.includes(id)); k.classList.toggle('erledigt', i < aktivIdx); });
+    WERKZEUGE.forEach(w => document.getElementById('w-' + w.id).classList.toggle('aktiv', S.w.includes(w.id)));
+    document.querySelectorAll('.raum').forEach(r => r.classList.toggle('an', S.r.includes(r.dataset.raum)));
+    document.querySelectorAll('[data-bt]').forEach(e => e.classList.toggle('an', (S.b || []).includes(e.dataset.bt)));
+    for (const id in tueren) { const [ab, deg] = tueren[id]; document.getElementById(id).style.transform = n >= ab ? `rotate(${deg}deg)` : 'none'; }
+    zeichnen.forEach(p => { const zeigen = p.closest('[data-sicht]').classList.contains('an'); p.style.strokeDashoffset = zeigen ? 0 : p.dataset.l; });
+    document.getElementById('masz').textContent = S.m;
+    document.querySelectorAll('.pegel rect').forEach((r, i) => r.classList.toggle('an', i < PEGEL[n]));
+    document.getElementById('zaehler').textContent = String(n).padStart(2, '0') + '/' + String(STUFEN.length - 1).padStart(2, '0');
+    schreibeStand();
+    document.querySelectorAll('.schritt').forEach(s => s.classList.toggle('aktiv', +s.dataset.stufe === n));
+    // Rekursions-Zähler: R1, R2, R3 … im Takt des Rings
+    clearInterval(rTimer);
+    const rz = document.getElementById('r-zahl'); let i = 1; rz.textContent = 'R₁';
+    const tief = ['₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+    if (n === 3 && !ruhig) rTimer = setInterval(() => { i = i % 9 + 1; rz.textContent = 'R' + tief[i - 1]; }, 6000);
+  }
+  function schreibeStand() { const S = STUFEN[Math.max(stufe, 0)]; document.getElementById('stand').textContent = S.s[root.dataset.lang === 'en' ? 1 : 0]; }
+
+  // Scroll: der Schritt in der Bildschirmmitte bestimmt die Stufe
+  // Desktop: Mitte des Fensters. Mobil: Linie knapp unter der klebenden Bühne, wo der Text sichtbar ist.
+  let io;
+  const beobachte = () => {
+    if (io) io.disconnect();
+    const rand = matchMedia('(max-width: 900px)').matches ? '-66% 0px -32% 0px' : '-48% 0px -48% 0px';
+    io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) setze(+e.target.dataset.stufe); }), { rootMargin: rand });
+    document.querySelectorAll('.schritt').forEach(s => io.observe(s));
+  };
+  beobachte();
+  matchMedia('(max-width: 900px)').addEventListener('change', beobachte);
+
+  // Ohne Projektnamen und Quellen zeigen: ?anonym
+  if (new URLSearchParams(location.search).has('anonym')) root.classList.add('anonym');
+
+  // Sprache: ?lang=en, sonst Browser, umschaltbar
+  const knoepfe = document.querySelectorAll('[data-setze]');
+  function sprache(l) { root.dataset.lang = l; root.lang = l; knoepfe.forEach(b => b.setAttribute('aria-pressed', b.dataset.setze === l)); document.title = l === 'en' ? 'Interim use cycle | NEST' : 'Zwischennutzungs-Kreislauf | NEST'; document.querySelectorAll('[data-heim]').forEach(x => x.href = l === 'en' ? '../en/#methode' : '../#methode'); if (stufe >= 0) schreibeStand(); try { localStorage.setItem('nest-lang', l); } catch (e) {} }
+  knoepfe.forEach(b => b.addEventListener('click', () => sprache(b.dataset.setze)));
+  let start = new URLSearchParams(location.search).get('lang');
+  if (!start) { try { start = localStorage.getItem('nest-lang'); } catch (e) {} }
+  if (!start) start = (navigator.language || 'de').toLowerCase().startsWith('de') ? 'de' : 'en';
+  sprache(start === 'en' ? 'en' : 'de');
+
+  // Weniger Bewegung: SMIL anhalten, Stufen springen ohne Übergang
+  const mq = matchMedia('(prefers-reduced-motion: reduce)'); let ruhig = mq.matches;
+  const ruhe = () => { ruhig = mq.matches; ruhig ? svg.pauseAnimations() : svg.unpauseAnimations(); };
+  mq.addEventListener('change', ruhe); ruhe();
+
+  // Mobil: Ausschnitt ohne Werkzeug-Schiene
+  const mobil = matchMedia('(max-width: 900px)');
+  const box = () => svg.setAttribute('viewBox', mobil.matches ? '0 30 900 780' : '0 0 1100 800');
+  mobil.addEventListener('change', box); box();
+
+  setze(0);
+})();
+</script>
+</body>
+</html>

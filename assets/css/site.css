@@ -462,3 +462,20 @@ html .recht-blatt h1,html .recht-blatt h2{font-size:clamp(28px,5vw,72px);hyphens
 .absatz p{white-space:pre-line}
 .stand{font-size:13px;color:var(--text-leise)}
 @media (max-width:700px){.absatz{grid-template-columns:1fr}}
+
+/* Kreislauf-Einstieg unter der Methode */
+.kreislauf-teaser{margin-top:clamp(36px,4vw,64px);display:grid;grid-template-columns:minmax(120px,220px) minmax(0,1fr);gap:clamp(20px,4vw,64px);align-items:center;padding:clamp(20px,3vw,40px);background:var(--weiss);border:1px solid var(--schwarz)}
+.kreislauf-teaser h3{margin:6px 0 12px}
+.kreislauf-teaser p{margin-bottom:18px}
+.kreislauf-teaser__k{font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.kreislauf-mini{width:100%;height:auto}
+.kreislauf-mini__lauf{transform-origin:100px 100px;animation:kreislauf-lauf 14s linear infinite}
+@keyframes kreislauf-lauf{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.kreislauf-mini__lauf{animation:none}}
+@media (max-width:640px){.kreislauf-teaser{grid-template-columns:1fr}.kreislauf-mini{max-width:160px}}
+
+/* Projektbilder: je Projekt ein Schwarzweißbild 3:2, sonst Plangrafik */
+.karte .bild{aspect-ratio:3/2}
+.tafel-bild.leer,.karte .bild.leer,.galerie .buehne-bild.leer{background:var(--grund);display:grid;place-items:center}
+.plan-platz{width:min(70%,320px);height:auto}
+.karte .bild.leer .plan-platz{width:62%}
