@@ -1,0 +1,137 @@
+/* Entwurf 6: nur auf entwurf-6*.html geladen. CD: Plan auf Weiß, Schwarz, Gelb = belegt/aktiv, Mono für Maße. */
+.e6-h1{font-size:clamp(40px,6vw,96px);margin:6px 0 20px}
+.e6-kicker{font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.e6-kicker a{text-decoration:none}
+.e6-hinweis{font-size:13px;color:var(--text-leise);margin-top:20px}
+.e6-unterkopf{font-size:clamp(22px,2vw,30px);margin:48px 0 16px}
+
+/* Methodik: Leiste und große Ziffer des aktuellen Schritts. Ab 901 px klebt die Reihe einen Laufweg lang. */
+@media (min-width:901px){
+  .e6-schritte::after{content:"";display:block;height:110vh}
+  .e6-schritte__haft{position:sticky;top:clamp(24px,8vh,80px)}
+  .e6-schritte__haft .e6-leiste{position:static}
+}
+.e6-leiste{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:16px;padding:14px 0;background:var(--grund);margin-bottom:24px}
+.e6-leiste__spur{flex:1;height:6px;background:#d9d9d4;position:relative}
+.e6-leiste__spur i{position:absolute;inset:0 auto 0 0;width:calc(var(--e6p,0) * 100%);background:var(--schwarz);transition:width .3s var(--ease)}
+.e6-leiste__nr{font-size:13px;min-width:6ch;text-align:right}
+@media (max-width:1199px){.e6-leiste{top:60px}}
+.e6 .weg::before,.e6 .weg li::before,.e6 .weg li::after{display:none}
+.e6 .weg li{padding-top:clamp(84px,8vw,120px)}
+.e6 .weg .knoten{width:auto;height:auto;border:0;background:none;display:block;font:700 clamp(72px,8vw,128px)/1 var(--f-text);letter-spacing:-.04em;color:#cfcfca;transition:color .35s var(--ease)}
+.e6 .weg li.e6-aktiv .knoten{color:var(--schwarz)}
+.e6 .weg li.erreicht .knoten{background:none}
+
+/* Leistungskacheln: schwarzer Kopf, gelbes Feld */
+.e6-kacheln{list-style:none;margin:0;padding:0;display:grid;gap:clamp(12px,1.6vw,24px)}
+.e6-kacheln--4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.e6-kacheln--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.e6-kachel{display:grid;grid-template-rows:auto 1fr;border:2px solid var(--schwarz)}
+.e6-kachel__kopf{background:var(--schwarz);color:var(--weiss);padding:18px 18px 20px;display:grid;gap:10px}
+.e6-kachel__kopf h3{font-size:clamp(20px,1.7vw,26px);color:var(--weiss)}
+.e6-kachel__code{font-size:clamp(28px,2.6vw,40px);color:var(--gelb);letter-spacing:-.02em}
+.e6-kachel__gleich{font-weight:300;color:#d0d3d6;font-size:.8em}
+.e6-kachel__feld{background:var(--gelb);padding:18px}
+.e6-kachel__feld p{font-size:16px;line-height:1.5}
+.e6-kachel__feld ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:6px;font-size:12px}
+.e6-bereiche-kopf{margin-top:clamp(48px,6vw,96px)}
+@media (max-width:1000px){.e6-kacheln--4{grid-template-columns:repeat(2,minmax(0,1fr))}.e6-kacheln--3{grid-template-columns:1fr}}
+@media (max-width:560px){.e6-kacheln--4{grid-template-columns:1fr}}
+
+/* Maßstab: gelbe Balken auf logarithmischer Skala */
+.e6-skala{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.e6-skala a{display:grid;grid-template-columns:5ch minmax(0,4fr) minmax(0,6fr);gap:clamp(12px,2vw,32px);align-items:center;padding:16px 0;border-top:1px solid rgba(255,255,255,.35);text-decoration:none}
+.e6-skala a:hover .e6-skala__k{background:var(--gelb);color:var(--schwarz)}
+.e6-skala__k{font-size:clamp(20px,2vw,30px);padding:2px 6px;justify-self:start}
+.e6-skala__t{display:grid;gap:4px}.e6-skala__t .aufgabe{font-weight:700;font-size:clamp(18px,1.5vw,22px)}.e6-skala__t .beispiel{font-size:15px;color:var(--text-leise-dunkel)}
+.e6-skala__balken{position:relative;height:28px;display:flex;align-items:center}
+.e6-skala__balken i{position:absolute;inset:0 auto 0 0;width:0;background:var(--gelb);transition:width 1.1s var(--ease)}
+.e6-skala li.sicht .e6-skala__balken i,.e6-skala li.e6-an .e6-skala__balken i{width:calc(var(--w) * 100%)}
+.e6-skala__balken span{position:relative;margin-left:calc(var(--w) * 100% + 10px);font-size:13px;white-space:nowrap}
+.e6-skala li:last-child .e6-skala__balken span{margin-left:auto;margin-right:8px;color:var(--schwarz)}
+.e6-skala__fuss{font-size:12px;margin-top:16px;color:var(--text-leise-dunkel)}
+@media (max-width:760px){.e6-skala a{grid-template-columns:5ch 1fr}.e6-skala__balken{grid-column:1/-1}}
+
+/* Team */
+.e6-team{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,48px)}
+.e6-person__bild{aspect-ratio:1;background:var(--grund);display:grid;place-items:center;position:relative;margin-bottom:14px}
+.e6-person__bild svg{width:62%;height:auto}
+.e6-person__bild span{position:absolute;left:0;right:0;bottom:12%;text-align:center;font-size:12px;color:var(--text-leise)}
+.e6-person h3{font-size:clamp(20px,1.6vw,26px)}
+.e6-person p{font-size:13px;margin-top:4px}
+.e6-person__mail{color:var(--text-leise)}
+.e6-gruppen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(20px,3vw,48px);margin-top:28px}
+.e6-gruppe h3{font-size:18px;border-top:2px solid var(--schwarz);padding-top:10px;margin-bottom:10px}
+.e6-gruppe ul{list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:16px}
+@media (max-width:1000px){.e6-team{grid-template-columns:repeat(2,minmax(0,1fr))}.e6-gruppen{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.e6-team,.e6-gruppen{grid-template-columns:1fr}}
+
+/* Presse */
+.e6-zitat{margin:24px 0 40px;max-width:900px}
+.e6-zitat blockquote{font-size:clamp(24px,2.6vw,40px);font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.e6-zitat figcaption{font-size:13px;margin-top:14px;color:var(--text-leise)}
+.e6-filter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
+.e6-filter button{font:400 14px var(--f-mono);padding:8px 14px;border:2px solid var(--schwarz);background:var(--weiss);cursor:pointer;min-height:44px}
+.e6-filter button[aria-pressed="true"]{background:var(--schwarz);color:var(--gelb)}
+.e6-presse{display:grid;grid-template-columns:88px minmax(0,1fr);gap:clamp(16px,3vw,48px);align-items:start}
+.e6-jahresleiste{position:sticky;top:24px;display:grid;gap:4px;font-size:14px}
+.e6-jahresleiste a{text-decoration:none;padding:2px 6px;justify-self:start}
+.e6-jahresleiste a.aktiv{background:var(--gelb)}
+.e6-jahresleiste a.leer{opacity:.3;pointer-events:none}
+.e6-jahr{scroll-margin-top:80px}
+.e6-jahr__h{font-size:clamp(28px,3vw,44px);border-top:2px solid var(--schwarz);padding-top:10px;margin:0 0 6px}
+.e6-jahr ol{list-style:none;margin:0 0 36px;padding:0}
+.e6-eintrag{display:grid;grid-template-columns:12ch 14ch minmax(0,14rem) minmax(0,1fr);gap:16px;padding:10px 0;border-top:1px solid #d9d9d4;font-size:16px}
+.e6-eintrag__datum,.e6-eintrag__kat{font-size:13px}.e6-eintrag__kat{color:var(--text-leise)}
+.e6-eintrag__medium{font-weight:700}
+.e6-eintrag[hidden],.e6-jahr[hidden]{display:none}
+@media (max-width:1199px){.e6-jahresleiste{top:84px}}
+@media (max-width:800px){.e6-presse{grid-template-columns:1fr}.e6-jahresleiste{position:sticky;top:60px;display:flex;overflow-x:auto;background:var(--weiss);padding:8px 0;z-index:3}.e6-eintrag{grid-template-columns:1fr;gap:2px}}
+
+/* Projektindex */
+.e6-index{list-style:none;margin:0;padding:0}
+.e6-index a{display:grid;grid-template-columns:6ch minmax(0,3fr) minmax(0,3fr) minmax(0,2fr) minmax(0,2fr);gap:16px;align-items:baseline;padding:14px 0;border-top:1px solid var(--schwarz);text-decoration:none}
+.e6-index a:hover .e6-index__n{text-decoration:underline}
+.e6-index__k{background:var(--gelb);justify-self:start;padding:1px 6px;font-size:13px}
+.e6-index__n{font-weight:700;font-size:clamp(18px,1.6vw,24px)}
+.e6-index a > .mono{font-size:13px}
+.e6-index__z[hidden]{display:none}
+@media (max-width:800px){.e6-index a{grid-template-columns:6ch 1fr}.e6-index a > .mono:not(.e6-index__k){grid-column:2}}
+
+/* Projektseite */
+.e6-projekt__raster{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:clamp(24px,4vw,72px);align-items:start}
+.e6-projekt__haupt .lead{font-size:clamp(19px,1.6vw,24px);margin:14px 0 28px}
+.e6-bildleiste{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
+.e6-bildleiste figure{margin:0;flex:0 0 min(80%,640px);scroll-snap-align:start}
+.e6-bildleiste img,.e6-bildleiste .plan-platz{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;background:var(--grund)}
+.e6-bildleiste figure.leer{display:grid;background:var(--grund)}
+.e6-bildleiste figure.leer .plan-platz{width:70%;margin:auto;padding:6%}
+.e6-bildleiste figcaption{font-size:12px;padding-top:6px;color:var(--text-leise)}
+.e6-projekt__text{margin-top:32px}.e6-projekt__text p{margin-bottom:14px}
+.e6-infobox{position:sticky;top:24px;background:var(--gelb);padding:22px;display:grid;gap:16px}
+.e6-infobox__k{font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.e6-infobox dl{display:grid;gap:12px;margin:0}
+.e6-infobox dt{font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.e6-infobox dd{margin:2px 0 0;font-size:16px}
+.e6-infobox .btn{justify-self:start}
+.e6-nutzer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:6px 16px;font-size:15px}
+.e6-nutzer dt{font-weight:700}
+.e6-clippings{list-style:none;padding:0;margin:0}
+.e6-clippings li{display:grid;grid-template-columns:12ch 14rem minmax(0,1fr);gap:12px;padding:8px 0;border-top:1px solid #d9d9d4;font-size:15px}
+.e6-aehnlich ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.e6-aehnlich a{display:grid;gap:6px;padding:16px;border:2px solid var(--schwarz);text-decoration:none;min-height:120px}
+.e6-aehnlich a:hover{background:var(--gelb)}
+.e6-aehnlich a strong{font-size:20px}
+.e6-blaettern{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:40px;padding-top:24px;border-top:2px solid var(--schwarz)}
+@media (max-width:1199px){.e6-infobox{top:84px}}
+@media (max-width:900px){.e6-projekt__raster{grid-template-columns:1fr}.e6-infobox{position:static}.e6-aehnlich ul{grid-template-columns:1fr}.e6-clippings li{grid-template-columns:1fr;gap:2px}}
+
+/* Rechtstexte und Sitemap */
+.e6-phase7{display:inline-block;background:var(--gelb);padding:6px 10px;font-size:13px;margin-bottom:20px}
+.e6-recht h1{font-size:clamp(36px,5vw,72px);margin-bottom:12px}
+.e6-recht .absatz{margin:22px 0}.e6-recht .nr{display:block;font-size:13px;margin-bottom:6px}
+.e6-recht p{white-space:pre-line}
+.e6-sitemap{list-style:none;padding:0;margin:20px 0 0}
+.e6-sitemap li{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid #d9d9d4}
+.e6-sitemap .mono{font-size:13px;color:var(--text-leise)}
+.e6-kennung{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}.e6-kennung span:first-child{background:var(--gelb);padding:0 6px}
