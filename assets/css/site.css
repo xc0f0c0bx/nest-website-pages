@@ -464,20 +464,20 @@ html .recht-blatt h1,html .recht-blatt h2{font-size:clamp(28px,5vw,72px);hyphens
 @media (max-width:700px){.absatz{grid-template-columns:1fr}}
 
 /* Kreislauf als eigener Block (Grafik aus der Website 2027) */
-.kreislauf-block .kr-hinweis{font-size:15px;color:var(--text-leise-dunkel)}
+.kreislauf-block{background:var(--weiss);border-top:1px solid var(--schwarz)}
+.kreislauf-block .kr-hinweis{font-size:15px;color:var(--text-leise)}
 .kr-haft{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(28px,5vw,96px);align-items:center}
-.kr-figur{margin:0;background:radial-gradient(circle closest-side,var(--anthrazit) 100%,transparent 100%)}
+.kr-figur{margin:0}
 .kr-grafik{display:block;width:100%;max-width:560px;height:auto;margin-inline:auto}
 .kr-caps{list-style:none;margin:0;padding:0;display:grid;gap:18px}
 .kr-cap{border-top:1px solid currentColor;padding-top:8px;display:grid;gap:4px;transition:border-top-width .25s var(--ease),opacity .25s var(--ease)}
 .kr-cap__k{font-size:13px;letter-spacing:.04em;text-transform:uppercase}
-.kr-cap__t{font-size:clamp(16px,1.15vw,18px);color:var(--text-leise-dunkel)}
-.kr-cap--aktiv{border-top-width:4px;border-top-color:var(--gelb)}
+.kr-cap__t{font-size:clamp(16px,1.15vw,18px);color:var(--text-leise)}
+.kr-cap--aktiv{border-top-width:4px}
 .kr-cap--aktiv .kr-cap__k{text-decoration:underline;text-underline-offset:.15em}
-.kr-mehr{display:inline-block;margin-top:24px;font-size:13px;color:var(--gelb)}
+.kr-mehr{display:inline-block;margin-top:24px;font-size:13px}
 /* Bewegung: erst die Klasse dimmt und versteckt, ohne Skript steht der Endzustand */
-.kr--animiert .kr-segment{opacity:.35;transition:opacity .4s var(--ease)}
-.kr--animiert .kr-segment.kr-dran{opacity:1}
+/* Flächen bleiben in den Farben des PDFs (Funkhaus-Studie S. 7) und werden nicht abgedimmt */
 .kr--animiert .kr-buchstabe{opacity:0;transition:opacity .2s ease}
 .kr--animiert .kr-buchstabe.kr-dran{opacity:1}
 .kr--animiert .kr-pfeil{stroke-dasharray:var(--kr-len,0);stroke-dashoffset:calc(var(--kr-len,0) * (1 - var(--kr-p,0)))}
